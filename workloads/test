@@ -1,0 +1,10 @@
+zipf=1
+initialSize=1000
+
+operationCount=10
+distShiftFreq=5
+distShiftPrct=25
+fetchProportion=0.5
+insertProportion=0.5
+deleteProportion=0
+updateProportion=0
