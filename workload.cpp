@@ -24,6 +24,8 @@ Workload::Workload(float zipf,
         this->hm = new ChainedHashmap();
     } else if (storageEngine.compare("linearProbing")) {
         // init
+    } else if (storageEngine.compare("chainedAdaptive")) {
+        this->hm = new ChainedAdaptive();
     } else {
         this->hm = new ChainedHashmap();
     }
@@ -65,6 +67,8 @@ Workload::Workload(string filename) {
                 this->hm = new ChainedHashmap();
             } else if (strcmp(val, "linearProbing") == 0) {
                 // this->hm = new LinearProbingHashmap();
+            } else if (strcmp(val, "chainedAdaptive") == 0) {
+                this->hm = new ChainedAdaptive();
             }
         }
     }

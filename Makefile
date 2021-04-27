@@ -8,8 +8,11 @@ workload.o: workload.cpp workload.h
 chained.o: chained.cpp chained.h hashmap.h
 	$(CC) -c chained.cpp chained.h
 
-benchmark: main.cpp workload.o chained.o
-	$(CC) -o benchmark.out main.cpp workload.o chained.o
+chained_adaptive.o: chained_adaptive.cpp chained_adaptive.h hashmap.h
+	$(CC) -c chained_adaptive.cpp chained_adaptive.h
+
+benchmark: main.cpp workload.o chained.o chained_adaptive.o
+	$(CC) -o benchmark.out main.cpp workload.o chained.o chained_adaptive.o
 
 clean:
 	rm -f *.o

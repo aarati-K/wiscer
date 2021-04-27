@@ -11,4 +11,4 @@ Wiscer is a benchmarking tool for systematically generating skewed workloads and
 * `fetchProportion` - Proportion of fetch requests
 * `deleteProportion` - Proportion of delete requests
 * `updateProportion` - Proportion of update requests
-* `storageEngine` - What storage engine to use. Options are `chained`|`linearProbing` (default: `chained`)
+* `storageEngine` - What storage engine to use. Options are `chained`|`linearProbing|chainedAdaptive|lpAdaptive` (default: `chained`)

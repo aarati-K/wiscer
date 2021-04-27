@@ -10,6 +10,7 @@
 #include <cmath>
 #include "hashmap.h"
 #include "chained.h"
+#include "chained_adaptive.h"
 
 using namespace std;
 

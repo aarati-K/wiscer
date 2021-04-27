@@ -2,6 +2,9 @@
 
 using namespace std;
 
+#ifndef _CHAINED_H_
+#define _CHAINED_H_
+
 typedef struct KV {
     ulong key;
     ulong value;
@@ -35,3 +38,5 @@ public:
     ulong _getTimeDiff(struct timespec, struct timespec);
     int _getHashpower();
 };
+
+#endif // _CHAINED_H_
