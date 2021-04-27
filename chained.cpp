@@ -14,6 +14,9 @@ void ChainedHashmap::initHashpower(int hashpower) {
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
     this->entries = (KV*)malloc(sizeof(KV)*hmsize*1.5); // safety factor
+    memset(this->dict, 0, sizeof(KV*)*hmsize);
+    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    entriesOffset = 0;
 }
 
 void ChainedHashmap::bulkLoad(ulong *keys, ulong num_keys) {
@@ -24,6 +27,7 @@ void ChainedHashmap::bulkLoad(ulong *keys, ulong num_keys) {
 }
 
 ulong ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
+    ulong time_elapsed_us;
     clock_gettime(CLOCK_MONOTONIC, &startTime);
     for (ulong i=0; i<count; i++) {
         switch (reqs[i].reqType) {
@@ -44,24 +48,25 @@ ulong ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
         }
     }
     clock_gettime(CLOCK_MONOTONIC, &endTime);
-    return _getTimeDiff(startTime, endTime);
+    time_elapsed_us = _getTimeDiff(startTime, endTime);
+    return time_elapsed_us;
 }
 
 void ChainedHashmap::rehash() {
     if (cardinality < hmsize && cardinality > 0.5*hmsize) {
         return;
     }
+    cout << "Rehashing triggered at cardinality " << this->cardinality << endl;
     KV* old_entries = entries;
     KV** old_dict = dict;
     ulong old_hmsize = hmsize;
-    if (this->cardinality > this->hmsize) {
-        this->hashpower += 1;
-    } else if (this->cardinality < 0.5*this->hmsize) {
-        this->hashpower -= 1;
-    }
+    this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
     entries = (KV*)malloc(sizeof(KV)*hmsize*1.5);
+    memset(this->dict, 0, sizeof(KV*)*hmsize);
+    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    entriesOffset = 0;
 
     KV* ptr;
     ulong h;
@@ -123,6 +128,7 @@ inline void ChainedHashmap::_insert(HashmapReq *r) {
     }
     // else, insert
     _setFinal(r->key, r->value);
+    cardinality += 1;
 }
 
 inline void ChainedHashmap::_delete(HashmapReq *r) {
@@ -138,6 +144,7 @@ inline void ChainedHashmap::_delete(HashmapReq *r) {
     } else {
         dict[h] = cur->next;
     }
+    cardinality -= 1;
 }
 
 inline void ChainedHashmap::_update(HashmapReq *r) {
@@ -157,4 +164,12 @@ inline void ChainedHashmap::_setFinal(ulong key, ulong value) {
 inline ulong ChainedHashmap::_getTimeDiff(struct timespec startTime, struct timespec endTime) {
     return (ulong)((endTime.tv_sec - startTime.tv_sec)*1000000 +
         double(endTime.tv_nsec - startTime.tv_nsec)/1000);
+}
+
+inline int ChainedHashmap::_getHashpower() {
+    int hashpower = 0;
+    while (pow(2, hashpower) < this->cardinality) {
+        hashpower += 1;
+    }
+    return hashpower;
 }

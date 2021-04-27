@@ -38,7 +38,7 @@ private:
 
     // Random prime numbers to choose from
     ulong chosenPrime[2];
-    ulong batchSize = 100000; // 100k requests at a time
+    ulong batchSize = 1000000; // 1M requests at a time
     ulong _multAddHash(ulong);
     void _choosePrime();
     ulong _random();
@@ -58,7 +58,8 @@ public:
         float fetchProportion,
         float insertProportion,
         float updateProportion,
-        float deleteProportion
+        float deleteProportion,
+        string storageEngine
     );
     Workload(string filename);
     void printParams();

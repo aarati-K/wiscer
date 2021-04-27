@@ -8,7 +8,8 @@ Workload::Workload(float zipf,
     float fetchProportion,
     float insertProportion,
     float updateProportion,
-    float deleteProportion
+    float deleteProportion,
+    string storageEngine
 ) {
     this->zipf = zipf;
     this->initialSize = initialSize;
@@ -19,7 +20,13 @@ Workload::Workload(float zipf,
     this->insertProportion = insertProportion;
     this->updateProportion = updateProportion;
     this->deleteProportion = deleteProportion;
-    // init hashmap
+    if (storageEngine.compare("chained")) {
+        this->hm = new ChainedHashmap();
+    } else if (storageEngine.compare("linearProbing")) {
+        // init
+    } else {
+        this->hm = new ChainedHashmap();
+    }
 }
 
 Workload::Workload(string filename) {
@@ -53,9 +60,17 @@ Workload::Workload(string filename) {
             this->updateProportion = stof(val);
         } else if (strcmp(property, "deleteProportion") == 0) {
             this->deleteProportion = stof(val);
+        } else if (strcmp(property, "storageEngine") == 0) {
+            if (strcmp(val, "chained") == 0) {
+                this->hm = new ChainedHashmap();
+            } else if (strcmp(val, "linearProbing") == 0) {
+                // this->hm = new LinearProbingHashmap();
+            }
         }
     }
-    // init hashmap
+    if (this->hm == NULL) {
+        this->hm = new ChainedHashmap();
+    }
 }
 
 void Workload::printParams() {
@@ -75,20 +90,24 @@ void Workload::run() {
 
     // Run
     HashmapReq *reqs = (HashmapReq*)malloc(sizeof(HashmapReq)*this->batchSize);
+    memset(reqs, 0, sizeof(HashmapReq)*this->batchSize);
     ulong numBatches = this->operationCount/this->batchSize;
     if (this->operationCount % this->batchSize > 0) {
         numBatches += 1;
     }
-    this->throughput = (ulong*)malloc(sizeof(ulong)*numBatches); 
+    this->throughput = (ulong*)malloc(sizeof(ulong)*numBatches);
+    memset(this->throughput, 0, sizeof(ulong)*numBatches);
     float fetchSlab = this->fetchProportion*100;
     float insertSlab = (this->fetchProportion + this->insertProportion)*100;
     float deleteSlab = (this->fetchProportion + this->insertProportion + 
         this->deleteProportion)*100;
     float updateSlab = 100;
     ulong r;
+    ulong timeElapsed;
+    ulong totalTime = 0;
     for (ulong i=0; i<numBatches; i++) {
         ulong batchSize = this->batchSize;
-        if (i == numBatches - 1) {
+        if (i == numBatches - 1 && (this->operationCount % this->batchSize) > 0) {
             batchSize = this->operationCount % this->batchSize;
         }
         for (ulong j=0; j<batchSize; j++) { //
@@ -111,9 +130,12 @@ void Workload::run() {
                 this->_shiftDist();
             }
         }
-        // throughput[i] = hm->processReqs(reqs, numReqs);
-        // hm->rehash(); // Do rehashing if necessary
+        timeElapsed = hm->processRequests(reqs, batchSize); // us
+        throughput[i] = (1000000*batchSize)/timeElapsed;
+        totalTime += timeElapsed;
+        hm->rehash(); // Do rehashing if necessary
     }
+    cout << "Total time (us): " << totalTime << endl;
     std::free(reqs);
     storeOutput();
 }
@@ -123,16 +145,15 @@ inline void Workload::initHashmap() {
     while (pow(2, hashpower) < this->initialSize) {
         hashpower += 1;
     }
-    // if (hm == NULL) {
-    //     hm = new Hashmap();
-    // }
-    // hm->initHashpower(hashpower);
+
+    hm->initHashpower(hashpower);
     this->_choosePrime();
 
     ulong finalSize = this->initialSize + this->insertProportion*operationCount + 1;
     popOrder = (ulong*)malloc(sizeof(ulong)*finalSize);
     cumProb = (double*)malloc(sizeof(double)*finalSize);
     memset(cumProb, 0, sizeof(double)*finalSize);
+    memset(popOrder, 0, sizeof(ulong)*finalSize);
 
     popOrder[0] = this->_multAddHash(0);
     cumProb[0] = 1/pow(1, this->zipf);
@@ -145,14 +166,22 @@ inline void Workload::initHashmap() {
         cumProb[i] += cumProb[i-1];
     }
 
-    // hm->bulkLoad(popOrder, initialSize)
+    hm->bulkLoad(popOrder, initialSize);
     this->cardinality = initialSize;
     this->maxInsertedIdx = initialSize-1;
     this->_random_shuffle(popOrder, initialSize);
 }
 
 void Workload::storeOutput() {
-
+    ofstream output("output.txt");
+    ulong numBatches = this->operationCount/this->batchSize;
+    if (this->operationCount % this->batchSize > 0) {
+        numBatches += 1;
+    }
+    for (ulong i=0; i<numBatches; i++) {
+        output << throughput[i] << endl;
+    }
+    output.close();
 }
 
 inline void Workload::_genFetchReq(HashmapReq *reqs, ulong i) {

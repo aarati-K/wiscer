@@ -4,6 +4,7 @@
 #include <time.h>
 #include <iostream>
 #include <cmath>
+#include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 
