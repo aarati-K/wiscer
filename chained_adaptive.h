@@ -16,19 +16,19 @@ class ChainedAdaptive : public Hashmap {
 private:
     KV **dict;
     KV *entries;
-    Acc **accesses_dict;
+    Acc **accessesDict;
     Acc *accesses;
     ulong entriesOffset = 0;
-    ulong accessesOffset = 0;
+    // ulong accessesOffset = 0; // should be entriesOffset + 1
     ulong numReqs = 0;
     struct timespec startTime, endTime;
 
-    bool adaptive_on = false;
-    bool sensing_on = false;
-    bool benchmarking_on = false;
+    bool adaptiveOn = false;
+    bool sensingOn = false;
+    bool benchmarkingOn = false;
 
     // Algorithm configuration
-    int periodicity = 30;
+    int periodicity = 40;
     int epoch_size_factor = 1;
     double confidence_prct = 0.95;
     int sample_size = 1000;
@@ -54,6 +54,7 @@ public:
     void _setFinal(ulong, ulong);
     ulong _getTimeDiff(struct timespec, struct timespec);
     int _getHashpower();
+    void _resetAccesses();
 };
 
 #endif // _CHAINED_ADAPTIVE_H_

@@ -135,16 +135,18 @@ inline void ChainedHashmap::_delete(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV *prev, *cur;
     cur = prev = dict[h];
-    while (cur->key != r->key) {
+    while (cur != NULL && cur->key != r->key) {
         prev = cur;
         cur = cur->next;
     }
+    if (cur == NULL) return;
     if (prev != cur) {
         prev->next = cur->next;
     } else {
         dict[h] = cur->next;
     }
     cardinality -= 1;
+    numReqs += 1;
 }
 
 inline void ChainedHashmap::_update(HashmapReq *r) {

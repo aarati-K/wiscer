@@ -6,7 +6,11 @@ ChainedAdaptive::ChainedAdaptive() {
     this->cardinality = 0;
     this->dict = NULL;
     this->entries = NULL;
+    this->accessesDict = NULL;
+    this->accesses = NULL;
     this->entriesOffset = 0;
+    this->u0 = this->v0 = this->w0 = -1;
+    this->u1 = this->v1 = this->w1 = -1;
 }
 
 void ChainedAdaptive::initHashpower(int hashpower) {
@@ -14,8 +18,12 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
     this->entries = (KV*)malloc(sizeof(KV)*hmsize*1.5); // safety factor
+    this->accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
+    this->accesses = (Acc*)malloc(sizeof(Acc)*hmsize*1.5); // safety factor
     memset(this->dict, 0, sizeof(KV*)*hmsize);
     memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
+    memset(this->accesses, 0, sizeof(Acc)*(hmsize*1.5+1));
     entriesOffset = 0;
 }
 
@@ -84,6 +92,8 @@ void ChainedAdaptive::rehash() {
 void ChainedAdaptive::free() {
     std::free(dict);
     std::free(entries);
+    std::free(accessesDict);
+    std::free(accesses);
 }
 
 inline ulong ChainedAdaptive::_random() {
@@ -106,24 +116,43 @@ inline ulong ChainedAdaptive::_murmurHash(ulong h) {
 inline void ChainedAdaptive::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
+    int steps = 0;
     while (ptr && ptr->key != r->key) {
         ptr = ptr->next;
+        steps += 1;
     }
-    if (ptr != NULL) {
-        r->value = ptr->value;
-        numReqs += 1;
-    }
+    if (ptr == NULL) return;
+    r->value = ptr->value;
+    numReqs += 1;
+    // if (adaptiveOn) {
+    //     Acc* aptr = accessesDict[h];
+    //     while (steps) {
+    //         aptr = aptr->next;
+    //         steps -= 1;
+    //     }
+    //     aptr->accesses += 1;
+    // }
 }
 
 inline void ChainedAdaptive::_insert(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
+    int steps = 0;
     while (ptr && ptr->key != r->key) {
         ptr = ptr->next;
+        steps += 1;
     }
     if (ptr != NULL) {
         ptr->value = r->value;
         numReqs += 1;
+        if (adaptiveOn) {
+            Acc* aptr = accessesDict[h];
+            while (steps) {
+                aptr = aptr->next;
+                steps -= 1;
+            }
+            aptr->accesses += 1;
+        }
         return;
     }
     // else, insert
@@ -134,17 +163,25 @@ inline void ChainedAdaptive::_insert(HashmapReq *r) {
 inline void ChainedAdaptive::_delete(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV *prev, *cur;
+    Acc *aprev, *acur; // corresponding pointers in the accesses hm
     cur = prev = dict[h];
-    while (cur->key != r->key) {
+    aprev = acur = accessesDict[h];
+    while (cur != NULL && cur->key != r->key) {
         prev = cur;
+        aprev = acur;
         cur = cur->next;
+        acur = acur->next;
     }
+    if (cur == NULL) return;
     if (prev != cur) {
         prev->next = cur->next;
+        aprev->next = acur->next;
     } else {
         dict[h] = cur->next;
+        accessesDict[h] = acur->next;
     }
     cardinality -= 1;
+    numReqs += 1;
 }
 
 inline void ChainedAdaptive::_update(HashmapReq *r) {
@@ -157,6 +194,9 @@ inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
     ulong h = _murmurHash(key);
     entries[entriesOffset].next = dict[h];
     dict[h] = &entries[entriesOffset];
+    accesses[adaptiveOn*(entriesOffset+1)].accesses += 1; // avoiding if condition
+    accesses[entriesOffset+1].next = accessesDict[h];
+    accessesDict[h] = &accesses[entriesOffset+1];
     entriesOffset += 1;
     numReqs += 1;
 }
@@ -172,4 +212,10 @@ inline int ChainedAdaptive::_getHashpower() {
         hashpower += 1;
     }
     return hashpower;
+}
+
+inline void ChainedAdaptive::_resetAccesses() {
+    for (ulong i=0; i<=entriesOffset; i++) {
+        accesses[i].accesses = 0;
+    }
 }
