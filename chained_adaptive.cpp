@@ -11,6 +11,7 @@ ChainedAdaptive::ChainedAdaptive() {
     this->entriesOffset = 0;
     this->u0 = this->v0 = this->w0 = -1;
     this->u1 = this->v1 = this->w1 = -1;
+    this->mode = -1; // not initialized
 }
 
 void ChainedAdaptive::initHashpower(int hashpower) {
@@ -25,6 +26,9 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
     memset(this->accesses, 0, sizeof(Acc)*(hmsize*1.5+1));
     entriesOffset = 0;
+    epochSize = hmsize/float(epoch_size_factor);
+    mode = 0; // adaptive
+    numReqsSlab = epochSize;
 }
 
 void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
@@ -53,6 +57,29 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                 break;
             default:
                 break;
+        }
+        if (numReqs == numReqsSlab) {
+            if (mode == ADAPTIVE) {
+                // finished running adaptive code, should benchmark now
+                numReqsSlab += sample_size;
+                mode = BENCHMARKING;
+            } else if (mode == BENCHMARKING) {
+                // finished running benchmarking, calculate metrics and run
+                // default code
+                numReqsSlab += epochSize*(periodicity - 1);
+                mode = DEFAULT;
+            } else if (mode == DEFAULT) {
+                // finished running default code, should sense the distribution
+                numReqsSlab += sample_size;
+                mode = SENSING;
+            } else if (mode == SENSING) {
+                // finished sensing the new distribution
+                // if adaptive should turn on
+                numReqsSlab += epochSize;
+                mode = ADAPTIVE;
+                // else
+                // mode = DEFAULT;
+            }
         }
     }
     clock_gettime(CLOCK_MONOTONIC, &endTime);
@@ -131,7 +158,7 @@ inline void ChainedAdaptive::_fetch(HashmapReq *r) {
     if (ptr == NULL) return;
     r->value = ptr->value;
     numReqs += 1;
-    if (adaptiveOn) {
+    if (mode == ADAPTIVE) {
         Acc* aptr = accessesDict[h];
         while (steps) {
             aptr = aptr->next;
@@ -149,22 +176,22 @@ inline void ChainedAdaptive::_insert(HashmapReq *r) {
         ptr = ptr->next;
         steps += 1;
     }
-    if (ptr != NULL) {
-        ptr->value = r->value;
-        numReqs += 1;
-        if (adaptiveOn) {
-            Acc* aptr = accessesDict[h];
-            while (steps) {
-                aptr = aptr->next;
-                steps -= 1;
-            }
-            aptr->accesses += 1;
-        }
+    if (ptr==NULL) {
+        _setFinal(r->key, r->value);
+        cardinality += 1;
         return;
     }
-    // else, insert
-    _setFinal(r->key, r->value);
-    cardinality += 1;
+    // else
+    ptr->value = r->value;
+    numReqs += 1;
+    if (mode == ADAPTIVE) {
+        Acc* aptr = accessesDict[h];
+        while (steps) {
+            aptr = aptr->next;
+            steps -= 1;
+        }
+        aptr->accesses += 1;
+    }
 }
 
 inline void ChainedAdaptive::_delete(HashmapReq *r) {
@@ -188,7 +215,6 @@ inline void ChainedAdaptive::_delete(HashmapReq *r) {
         accessesDict[h] = acur->next;
     }
     cardinality -= 1;
-    numReqs += 1;
 }
 
 inline void ChainedAdaptive::_update(HashmapReq *r) {
@@ -201,11 +227,9 @@ inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
     ulong h = _murmurHash(key);
     entries[entriesOffset].next = dict[h];
     dict[h] = &entries[entriesOffset];
-    accesses[adaptiveOn*(entriesOffset+1)].accesses += 1; // avoiding if condition
     accesses[entriesOffset+1].next = accessesDict[h];
     accessesDict[h] = &accesses[entriesOffset+1];
     entriesOffset += 1;
-    numReqs += 1;
 }
 
 // Used only while rehashing, don't use elsewhere

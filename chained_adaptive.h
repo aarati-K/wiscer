@@ -6,6 +6,11 @@ using namespace std;
 #ifndef _CHAINED_ADAPTIVE_H_
 #define _CHAINED_ADAPTIVE_H_
 
+#define ADAPTIVE 0
+#define BENCHMARKING 1
+#define DEFAULT 2
+#define SENSING 3
+
 typedef struct Acc
 {
     uint8_t accesses = 0;
@@ -21,11 +26,10 @@ private:
     ulong entriesOffset = 0;
     // ulong accessesOffset = 0; // should be entriesOffset + 1
     ulong numReqs = 0;
+    ulong numReqsSlab = 0;
     struct timespec startTime, endTime;
 
-    bool adaptiveOn = false;
-    bool sensingOn = false;
-    bool benchmarkingOn = false;
+    int mode = -1;
 
     // Algorithm configuration
     int periodicity = 40;
@@ -33,6 +37,8 @@ private:
     double confidence_prct = 0.95;
     int sample_size = 1000;
 
+    // Algorithm parameters
+    ulong epochSize = 0;
     double u0, v0, w0; // estimated when benchmarking
     double u1, v1, w1; // estimated when sensing 
 
