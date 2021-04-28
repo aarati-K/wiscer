@@ -6,13 +6,16 @@ workload.o: workload.cpp workload.h
 	$(CC) -c workload.cpp
 
 chained.o: chained.cpp chained.h hashmap.h
-	$(CC) -c chained.cpp chained.h
+	$(CC) -c chained.cpp
 
-chained_adaptive.o: chained_adaptive.cpp chained_adaptive.h hashmap.h
-	$(CC) -c chained_adaptive.cpp chained_adaptive.h
+chained_adaptive.o: chained_adaptive.h chained_adaptive.cpp hashmap.h
+	$(CC) -c chained_adaptive.cpp
 
-benchmark: main.cpp workload.o chained.o chained_adaptive.o
-	$(CC) -o benchmark.out main.cpp workload.o chained.o chained_adaptive.o
+main.o: main.cpp
+	$(CC) -c main.cpp
+
+benchmark: main.o workload.o chained.o chained_adaptive.o
+	$(CC) -o benchmark.out main.o workload.o chained.o chained_adaptive.o
 
 clean:
 	rm -f *.o
