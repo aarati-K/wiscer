@@ -67,26 +67,33 @@ void ChainedAdaptive::rehash() {
     cout << "Rehashing triggered at cardinality " << this->cardinality << endl;
     KV* old_entries = entries;
     KV** old_dict = dict;
+    Acc* old_accesses = accesses;
+    Acc** old_accesses_dict= accessesDict;
     ulong old_hmsize = hmsize;
     this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
     entries = (KV*)malloc(sizeof(KV)*hmsize*1.5);
+    accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
+    accesses = (Acc*)malloc(sizeof(Acc)*hmsize*1.5);
     memset(this->dict, 0, sizeof(KV*)*hmsize);
     memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
+    memset(this->accesses, 0, sizeof(Acc)*hmsize*1.5);
     entriesOffset = 0;
 
     KV* ptr;
-    ulong h;
     for (ulong i=0; i<old_hmsize; i++) {
         ptr = old_dict[i];
         while (ptr != NULL) {
-            _setFinal(ptr->key, ptr->value);
+            _setFinalEnd(ptr->key, ptr->value);
             ptr = ptr->next;
         }
     }
     std::free(old_entries);
     std::free(old_dict);
+    std::free(old_accesses_dict);
+    std::free(old_accesses);
 }
 
 void ChainedAdaptive::free() {
@@ -124,14 +131,14 @@ inline void ChainedAdaptive::_fetch(HashmapReq *r) {
     if (ptr == NULL) return;
     r->value = ptr->value;
     numReqs += 1;
-    // if (adaptiveOn) {
-    //     Acc* aptr = accessesDict[h];
-    //     while (steps) {
-    //         aptr = aptr->next;
-    //         steps -= 1;
-    //     }
-    //     aptr->accesses += 1;
-    // }
+    if (adaptiveOn) {
+        Acc* aptr = accessesDict[h];
+        while (steps) {
+            aptr = aptr->next;
+            steps -= 1;
+        }
+        aptr->accesses += 1;
+    }
 }
 
 inline void ChainedAdaptive::_insert(HashmapReq *r) {
@@ -199,6 +206,30 @@ inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
     accessesDict[h] = &accesses[entriesOffset+1];
     entriesOffset += 1;
     numReqs += 1;
+}
+
+// Used only while rehashing, don't use elsewhere
+// Inserts at the end of the chain, not at the start
+inline void ChainedAdaptive::_setFinalEnd(ulong key, ulong value) {
+    entries[entriesOffset].key = key;
+    entries[entriesOffset].value = value;
+    ulong h = _murmurHash(key);
+    KV* ptr = dict[h];
+    Acc* aptr = accessesDict[h];
+    entries[entriesOffset].next = NULL;
+    accesses[entriesOffset+1].next = NULL;
+    if (ptr == NULL) {
+        dict[h] = &entries[entriesOffset];
+        accessesDict[h] = &accesses[entriesOffset+1];
+    } else {
+        while (ptr->next != NULL) {
+            ptr = ptr->next;
+            aptr = aptr->next;
+        }
+        ptr->next = &entries[entriesOffset];
+        aptr->next = &accesses[entriesOffset+1];
+    }
+    entriesOffset += 1;
 }
 
 inline ulong ChainedAdaptive::_getTimeDiff(struct timespec startTime, struct timespec endTime) {

@@ -69,7 +69,6 @@ void ChainedHashmap::rehash() {
     entriesOffset = 0;
 
     KV* ptr;
-    ulong h;
     for (ulong i=0; i<old_hmsize; i++) {
         ptr = old_dict[i];
         while (ptr != NULL) {
