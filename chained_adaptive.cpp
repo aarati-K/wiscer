@@ -11,7 +11,7 @@ ChainedAdaptive::ChainedAdaptive() {
     this->entriesOffset = 0;
     this->u0 = this->v0 = this->w0 = -1;
     this->u1 = this->v1 = this->w1 = -1;
-    this->mode = -1; // not initialized
+    this->mode = ADAPTIVE;
 }
 
 void ChainedAdaptive::initHashpower(int hashpower) {
@@ -27,7 +27,7 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     memset(this->accesses, 0, sizeof(Acc)*(hmsize*1.5+1));
     entriesOffset = 0;
     epochSize = hmsize/float(epoch_size_factor);
-    mode = 0; // adaptive
+    mode = ADAPTIVE;
     numReqsSlab = epochSize;
     displacement = 0;
     displacement_sq = 0;
@@ -43,27 +43,31 @@ void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
 ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
     ulong time_elapsed_us;
     clock_gettime(CLOCK_MONOTONIC, &startTime);
-    ulong i = 0;
+    ulong i = 0, j;
+    ulong countReal = count;
+    // make this a multiple of 10, to avoid inner for loop check for i < count
+    count = count - (count % 10);
     while(i < count) {
         if (mode == ADAPTIVE) {
-            while (numReqs < numReqsSlab && i < count) {
-                switch (reqs[i].reqType) {
-                    case FETCH_REQ:
-                        _fetchAdaptive(&reqs[i]);
-                        break;
-                    case INSERT_REQ:
-                        _insert(&reqs[i]);
-                        break;
-                    case DELETE_REQ:
-                        _delete(&reqs[i]);
-                        break;
-                    case UPDATE_REQ:
-                        _update(&reqs[i]);
-                        break;
-                    default:
-                        break;
+            while (numReqs < numReqsSlab && i<count) {
+                for (j=0; j<10; j++,i++) {
+                    switch (reqs[i].reqType) {
+                        case FETCH_REQ:
+                            _fetchAdaptive(&reqs[i]);
+                            break;
+                        case INSERT_REQ:
+                            _insert(&reqs[i]);
+                            break;
+                        case DELETE_REQ:
+                            _delete(&reqs[i]);
+                            break;
+                        case UPDATE_REQ:
+                            _update(&reqs[i]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                i += 1;
             }
             if (i == count) break;
             numReqsSlab += sample_size;
@@ -72,24 +76,25 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             displacement_sq = 0;
         }
         if (mode == BENCHMARKING) {
-            while (numReqs < numReqsSlab && i < count) {
-                switch (reqs[i].reqType) {
-                    case FETCH_REQ:
-                        _fetchBenchmark(&reqs[i]);
-                        break;
-                    case INSERT_REQ:
-                        _insert(&reqs[i]);
-                        break;
-                    case DELETE_REQ:
-                        _delete(&reqs[i]);
-                        break;
-                    case UPDATE_REQ:
-                        _update(&reqs[i]);
-                        break;
-                    default:
-                        break;
+            while (numReqs < numReqsSlab && i<count) {
+                for (j=0; j<10; j++, i++) {
+                    switch (reqs[i].reqType) {
+                        case FETCH_REQ:
+                            _fetchBenchmark(&reqs[i]);
+                            break;
+                        case INSERT_REQ:
+                            _insert(&reqs[i]);
+                            break;
+                        case DELETE_REQ:
+                            _delete(&reqs[i]);
+                            break;
+                        case UPDATE_REQ:
+                            _update(&reqs[i]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                i += 1;
             }
             if (i == count) break;
             // Calculate u0, v0, w0
@@ -97,24 +102,25 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             mode = DEFAULT;
         }
         if (mode == DEFAULT) {
-            while (numReqs < numReqsSlab && i < count) {
-                switch (reqs[i].reqType) {
-                    case FETCH_REQ:
-                        _fetchDefault(&reqs[i]);
-                        break;
-                    case INSERT_REQ:
-                        _insert(&reqs[i]);
-                        break;
-                    case DELETE_REQ:
-                        _delete(&reqs[i]);
-                        break;
-                    case UPDATE_REQ:
-                        _update(&reqs[i]);
-                        break;
-                    default:
-                        break;
+            while (numReqs < numReqsSlab && i<count) {
+                for (j=0; j<10; j++, i++) {
+                    switch (reqs[i].reqType) {
+                        case FETCH_REQ:
+                            _fetchDefault(&reqs[i]);
+                            break;
+                        case INSERT_REQ:
+                            _insert(&reqs[i]);
+                            break;
+                        case DELETE_REQ:
+                            _delete(&reqs[i]);
+                            break;
+                        case UPDATE_REQ:
+                            _update(&reqs[i]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                i += 1;
             }
             if (i == count) break;
             numReqsSlab += sample_size;
@@ -123,30 +129,50 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             displacement_sq = 0;
         }
         if (mode == SENSING) {
-            while (numReqs < numReqsSlab && i < count) {
-                switch (reqs[i].reqType) {
-                    case FETCH_REQ:
-                        _fetchBenchmark(&reqs[i]);
-                        break;
-                    case INSERT_REQ:
-                        _insert(&reqs[i]);
-                        break;
-                    case DELETE_REQ:
-                        _delete(&reqs[i]);
-                        break;
-                    case UPDATE_REQ:
-                        _update(&reqs[i]);
-                        break;
-                    default:
-                        break;
+            while (numReqs < numReqsSlab && i<count) {
+                for (j=0; j<10; j++, i++) {
+                    switch (reqs[i].reqType) {
+                        case FETCH_REQ:
+                            _fetchBenchmark(&reqs[i]);
+                            break;
+                        case INSERT_REQ:
+                            _insert(&reqs[i]);
+                            break;
+                        case DELETE_REQ:
+                            _delete(&reqs[i]);
+                            break;
+                        case UPDATE_REQ:
+                            _update(&reqs[i]);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                i += 1;
             }
             if (i == count) break;
             // calculate u1, v1, w1, and compare to u0, v0, w0
             numReqsSlab += epochSize;
             mode = ADAPTIVE;
             // otherwise mode=DEFAULT
+        }
+    }
+    // Handle the remaining requests countReal - count, should be < 10
+    for (; i<countReal; i++) {
+        switch (reqs[i].reqType) {
+            case FETCH_REQ:
+                _fetchDefault(&reqs[i]);
+                break;
+            case INSERT_REQ:
+                _insert(&reqs[i]);
+                break;
+            case DELETE_REQ:
+                _delete(&reqs[i]);
+                break;
+            case UPDATE_REQ:
+                _update(&reqs[i]);
+                break;
+            default:
+                break;
         }
     }
     clock_gettime(CLOCK_MONOTONIC, &endTime);
