@@ -43,49 +43,110 @@ void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
 ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
     ulong time_elapsed_us;
     clock_gettime(CLOCK_MONOTONIC, &startTime);
-    for (ulong i=0; i<count; i++) {
-        switch (reqs[i].reqType) {
-            case FETCH_REQ:
-                _fetch(&reqs[i]);
-                break;
-            case INSERT_REQ:
-                _insert(&reqs[i]);
-                break;
-            case DELETE_REQ:
-                _delete(&reqs[i]);
-                break;
-            case UPDATE_REQ:
-                _update(&reqs[i]);
-                break;
-            default:
-                break;
-        }
-        if (numReqs == numReqsSlab) {
-            if (mode == ADAPTIVE) {
-                // finished running adaptive code, should benchmark now
-                numReqsSlab += sample_size;
-                mode = BENCHMARKING;
-                displacement = 0;
-                displacement_sq = 0;
-            } else if (mode == BENCHMARKING) {
-                // finished running benchmarking, calculate metrics and run
-                // default code
-                numReqsSlab += epochSize*(periodicity - 1);
-                mode = DEFAULT;
-            } else if (mode == DEFAULT) {
-                // finished running default code, should sense the distribution
-                numReqsSlab += sample_size;
-                mode = SENSING;
-                displacement = 0;
-                displacement_sq = 0;
-            } else if (mode == SENSING) {
-                // finished sensing the new distribution
-                // if adaptive should turn on
-                numReqsSlab += epochSize;
-                mode = ADAPTIVE;
-                // else
-                // mode = DEFAULT;
+    ulong i = 0;
+    while(i < count) {
+        if (mode == ADAPTIVE) {
+            while (numReqs < numReqsSlab && i < count) {
+                switch (reqs[i].reqType) {
+                    case FETCH_REQ:
+                        _fetchAdaptive(&reqs[i]);
+                        break;
+                    case INSERT_REQ:
+                        _insert(&reqs[i]);
+                        break;
+                    case DELETE_REQ:
+                        _delete(&reqs[i]);
+                        break;
+                    case UPDATE_REQ:
+                        _update(&reqs[i]);
+                        break;
+                    default:
+                        break;
+                }
+                i += 1;
             }
+            if (i == count) break;
+            numReqsSlab += sample_size;
+            mode = BENCHMARKING;
+            displacement = 0;
+            displacement_sq = 0;
+        }
+        if (mode == BENCHMARKING) {
+            while (numReqs < numReqsSlab && i < count) {
+                switch (reqs[i].reqType) {
+                    case FETCH_REQ:
+                        _fetchBenchmark(&reqs[i]);
+                        break;
+                    case INSERT_REQ:
+                        _insert(&reqs[i]);
+                        break;
+                    case DELETE_REQ:
+                        _delete(&reqs[i]);
+                        break;
+                    case UPDATE_REQ:
+                        _update(&reqs[i]);
+                        break;
+                    default:
+                        break;
+                }
+                i += 1;
+            }
+            if (i == count) break;
+            // Calculate u0, v0, w0
+            numReqsSlab += epochSize*(periodicity - 1);
+            mode = DEFAULT;
+        }
+        if (mode == DEFAULT) {
+            while (numReqs < numReqsSlab && i < count) {
+                switch (reqs[i].reqType) {
+                    case FETCH_REQ:
+                        _fetchDefault(&reqs[i]);
+                        break;
+                    case INSERT_REQ:
+                        _insert(&reqs[i]);
+                        break;
+                    case DELETE_REQ:
+                        _delete(&reqs[i]);
+                        break;
+                    case UPDATE_REQ:
+                        _update(&reqs[i]);
+                        break;
+                    default:
+                        break;
+                }
+                i += 1;
+            }
+            if (i == count) break;
+            numReqsSlab += sample_size;
+            mode = SENSING;
+            displacement = 0;
+            displacement_sq = 0;
+        }
+        if (mode == SENSING) {
+            while (numReqs < numReqsSlab && i < count) {
+                switch (reqs[i].reqType) {
+                    case FETCH_REQ:
+                        _fetchBenchmark(&reqs[i]);
+                        break;
+                    case INSERT_REQ:
+                        _insert(&reqs[i]);
+                        break;
+                    case DELETE_REQ:
+                        _delete(&reqs[i]);
+                        break;
+                    case UPDATE_REQ:
+                        _update(&reqs[i]);
+                        break;
+                    default:
+                        break;
+                }
+                i += 1;
+            }
+            if (i == count) break;
+            // calculate u1, v1, w1, and compare to u0, v0, w0
+            numReqsSlab += epochSize;
+            mode = ADAPTIVE;
+            // otherwise mode=DEFAULT
         }
     }
     clock_gettime(CLOCK_MONOTONIC, &endTime);
@@ -153,74 +214,85 @@ inline ulong ChainedAdaptive::_murmurHash(ulong h) {
     return h;
 }
 
-inline void ChainedAdaptive::_fetch(HashmapReq *r) {
+inline void ChainedAdaptive::_fetchDefault(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
-    if (mode == DEFAULT) {
-        while (ptr && ptr->key != r->key) {
-            ptr = ptr->next;
-        }
-        if (ptr == NULL) return;
-        r->value = ptr->value;
-        numReqs += 1;
-    } else if (mode == ADAPTIVE) {
-        KV* min_access_entry = ptr;
-        Acc* aptr = accessesDict[h];
-        Acc* min_access_ptr = aptr;
-        while (ptr && ptr->key != r->key) {
-            if (aptr->accesses < min_access_ptr->accesses) {
-                min_access_ptr = aptr;
-                min_access_entry = ptr;
-            }
-            ptr = ptr->next;
-            aptr = aptr->next;
-        }
-        if (ptr == NULL) return;
-        r->value = ptr->value;
-        numReqs += 1;
-        if (aptr->accesses > min_access_ptr->accesses) {
-            // exchange
-            ulong buf;
-            uint8_t abuf;
-
-            // key
-            buf = ptr->key;
-            ptr->key = min_access_entry->key;
-            min_access_entry->key = buf;
-
-            // value
-            buf = ptr->value;
-            ptr->value = min_access_entry->value;
-            min_access_entry->value = buf;
-
-            // accesses
-            abuf = aptr->accesses;
-            aptr->accesses = min_access_ptr->accesses;
-            min_access_ptr->accesses = abuf;
-        }
-    } else if (mode == BENCHMARKING) {
-        ulong disp = 0;
-        while (ptr && ptr->key != r->key) {
-            disp += 1;
-            ptr = ptr->next;
-        }
-        if (ptr == NULL) return;
-        r->value = ptr->value;
-        displacement += disp;
-        displacement_sq += disp*disp;
-        numReqs += 1;
-    } else if (mode == SENSING) {
-        ulong disp = 0;
-        while (ptr && ptr->key != r->key) {
-            disp += 1;
-            ptr = ptr->next;
-        }
-        if (ptr == NULL) return;
-        r->value = ptr->value;
-        displacement += disp;
-        displacement_sq += disp*disp;
-        numReqs += 1;
+    while (ptr && ptr->key != r->key) {
+        ptr = ptr->next;
     }
+    if (ptr == NULL) return;
+    r->value = ptr->value;
+    numReqs += 1;
+}
+
+inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
+    ulong h = _murmurHash(r->key);
+    KV* ptr = dict[h];
+    while (ptr && ptr->key != r->key) {
+        ptr = ptr->next;
+    }
+    if (ptr == NULL) return;
+    r->value = ptr->value;
+    numReqs += 1;
+    // ulong h = _murmurHash(r->key);
+    // KV* ptr = dict[h];
+    // ulong disp = 0;
+    // while (ptr && ptr->key != r->key) {
+    //     disp += 1;
+    //     ptr = ptr->next;
+    // }
+    // if (ptr == NULL) return;
+    // r->value = ptr->value;
+    // displacement += disp;
+    // displacement_sq += disp*disp;
+    // numReqs += 1;
+}
+
+inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
+    ulong h = _murmurHash(r->key);
+    KV* ptr = dict[h];
+    while (ptr && ptr->key != r->key) {
+        ptr = ptr->next;
+    }
+    if (ptr == NULL) return;
+    r->value = ptr->value;
+    numReqs += 1;
+    // ulong h = _murmurHash(r->key);
+    // KV* ptr = dict[h];
+    // KV* min_access_entry = ptr;
+    // Acc* aptr = accessesDict[h];
+    // Acc* min_access_ptr = aptr;
+    // while (ptr && ptr->key != r->key) {
+    //     if (aptr->accesses < min_access_ptr->accesses) {
+    //         min_access_ptr = aptr;
+    //         min_access_entry = ptr;
+    //     }
+    //     ptr = ptr->next;
+    //     aptr = aptr->next;
+    // }
+    // if (ptr == NULL) return;
+    // r->value = ptr->value;
+    // numReqs += 1;
+    // if (aptr->accesses > min_access_ptr->accesses) {
+    //     // exchange
+    //     ulong buf;
+    //     uint8_t abuf;
+
+    //     // key
+    //     buf = ptr->key;
+    //     ptr->key = min_access_entry->key;
+    //     min_access_entry->key = buf;
+
+    //     // value
+    //     buf = ptr->value;
+    //     ptr->value = min_access_entry->value;
+    //     min_access_entry->value = buf;
+
+    //     // accesses
+    //     abuf = aptr->accesses;
+    //     aptr->accesses = min_access_ptr->accesses;
+    //     min_access_ptr->accesses = abuf;
+    // }
 }
 
 inline void ChainedAdaptive::_insert(HashmapReq *r) {

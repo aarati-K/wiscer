@@ -55,7 +55,9 @@ public:
     // helper functions
     ulong _random();
     ulong _murmurHash(ulong);
-    void _fetch(HashmapReq*);
+    void _fetchDefault(HashmapReq*);
+    void _fetchAdaptive(HashmapReq*);
+    void _fetchBenchmark(HashmapReq*);
     void _insert(HashmapReq*);
     void _delete(HashmapReq*);
     void _update(HashmapReq*);
