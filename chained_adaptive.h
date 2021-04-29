@@ -36,6 +36,8 @@ private:
     int epoch_size_factor = 1;
     double confidence_prct = 0.95;
     int sample_size = 1000;
+    ulong displacement = 0;
+    ulong displacement_sq = 0;
 
     // Algorithm parameters
     ulong epochSize = 0;

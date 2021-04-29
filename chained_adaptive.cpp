@@ -29,6 +29,8 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     epochSize = hmsize/float(epoch_size_factor);
     mode = 0; // adaptive
     numReqsSlab = epochSize;
+    displacement = 0;
+    displacement_sq = 0;
 }
 
 void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
@@ -63,6 +65,8 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                 // finished running adaptive code, should benchmark now
                 numReqsSlab += sample_size;
                 mode = BENCHMARKING;
+                displacement = 0;
+                displacement_sq = 0;
             } else if (mode == BENCHMARKING) {
                 // finished running benchmarking, calculate metrics and run
                 // default code
@@ -72,6 +76,8 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                 // finished running default code, should sense the distribution
                 numReqsSlab += sample_size;
                 mode = SENSING;
+                displacement = 0;
+                displacement_sq = 0;
             } else if (mode == SENSING) {
                 // finished sensing the new distribution
                 // if adaptive should turn on
@@ -150,21 +156,70 @@ inline ulong ChainedAdaptive::_murmurHash(ulong h) {
 inline void ChainedAdaptive::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
-    int steps = 0;
-    while (ptr && ptr->key != r->key) {
-        ptr = ptr->next;
-        steps += 1;
-    }
-    if (ptr == NULL) return;
-    r->value = ptr->value;
-    numReqs += 1;
-    if (mode == ADAPTIVE) {
-        Acc* aptr = accessesDict[h];
-        while (steps) {
-            aptr = aptr->next;
-            steps -= 1;
+    if (mode == DEFAULT) {
+        while (ptr && ptr->key != r->key) {
+            ptr = ptr->next;
         }
-        aptr->accesses += 1;
+        if (ptr == NULL) return;
+        r->value = ptr->value;
+        numReqs += 1;
+    } else if (mode == ADAPTIVE) {
+        KV* min_access_entry = ptr;
+        Acc* aptr = accessesDict[h];
+        Acc* min_access_ptr = aptr;
+        while (ptr && ptr->key != r->key) {
+            if (aptr->accesses < min_access_ptr->accesses) {
+                min_access_ptr = aptr;
+                min_access_entry = ptr;
+            }
+            ptr = ptr->next;
+            aptr = aptr->next;
+        }
+        if (ptr == NULL) return;
+        r->value = ptr->value;
+        numReqs += 1;
+        if (aptr->accesses > min_access_ptr->accesses) {
+            // exchange
+            ulong buf;
+            uint8_t abuf;
+
+            // key
+            buf = ptr->key;
+            ptr->key = min_access_entry->key;
+            min_access_entry->key = buf;
+
+            // value
+            buf = ptr->value;
+            ptr->value = min_access_entry->value;
+            min_access_entry->value = buf;
+
+            // accesses
+            abuf = aptr->accesses;
+            aptr->accesses = min_access_ptr->accesses;
+            min_access_ptr->accesses = abuf;
+        }
+    } else if (mode == BENCHMARKING) {
+        ulong disp = 0;
+        while (ptr && ptr->key != r->key) {
+            disp += 1;
+            ptr = ptr->next;
+        }
+        if (ptr == NULL) return;
+        r->value = ptr->value;
+        displacement += disp;
+        displacement_sq += disp*disp;
+        numReqs += 1;
+    } else if (mode == SENSING) {
+        ulong disp = 0;
+        while (ptr && ptr->key != r->key) {
+            disp += 1;
+            ptr = ptr->next;
+        }
+        if (ptr == NULL) return;
+        r->value = ptr->value;
+        displacement += disp;
+        displacement_sq += disp*disp;
+        numReqs += 1;
     }
 }
 
