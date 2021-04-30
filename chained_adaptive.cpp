@@ -31,6 +31,7 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     numReqsSlab = epochSize;
     displacement = 0;
     displacement_sq = 0;
+    statReqCount = 0;
 }
 
 void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
@@ -74,6 +75,7 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             mode = BENCHMARKING;
             displacement = 0;
             displacement_sq = 0;
+            statReqCount = 0;
         }
         if (mode == BENCHMARKING) {
             while (numReqs < numReqsSlab && i<count) {
@@ -127,6 +129,7 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             mode = SENSING;
             displacement = 0;
             displacement_sq = 0;
+            statReqCount = 0;
         }
         if (mode == SENSING) {
             while (numReqs < numReqsSlab && i<count) {
@@ -254,71 +257,57 @@ inline void ChainedAdaptive::_fetchDefault(HashmapReq *r) {
 inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
+    ulong disp = 0;
     while (ptr && ptr->key != r->key) {
+        disp += 1;
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
     r->value = ptr->value;
+    displacement += disp;
+    displacement_sq += disp*disp;
     numReqs += 1;
-    // ulong h = _murmurHash(r->key);
-    // KV* ptr = dict[h];
-    // ulong disp = 0;
-    // while (ptr && ptr->key != r->key) {
-    //     disp += 1;
-    //     ptr = ptr->next;
-    // }
-    // if (ptr == NULL) return;
-    // r->value = ptr->value;
-    // displacement += disp;
-    // displacement_sq += disp*disp;
-    // numReqs += 1;
+    statReqCount += 1;
 }
 
 inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
+    KV* min_access_entry = ptr;
+    Acc* aptr = accessesDict[h];
+    Acc* min_access_ptr = aptr;
     while (ptr && ptr->key != r->key) {
+        if (aptr->accesses < min_access_ptr->accesses) {
+            min_access_ptr = aptr;
+            min_access_entry = ptr;
+        }
         ptr = ptr->next;
+        aptr = aptr->next;
     }
     if (ptr == NULL) return;
     r->value = ptr->value;
     numReqs += 1;
-    // ulong h = _murmurHash(r->key);
-    // KV* ptr = dict[h];
-    // KV* min_access_entry = ptr;
-    // Acc* aptr = accessesDict[h];
-    // Acc* min_access_ptr = aptr;
-    // while (ptr && ptr->key != r->key) {
-    //     if (aptr->accesses < min_access_ptr->accesses) {
-    //         min_access_ptr = aptr;
-    //         min_access_entry = ptr;
-    //     }
-    //     ptr = ptr->next;
-    //     aptr = aptr->next;
-    // }
-    // if (ptr == NULL) return;
-    // r->value = ptr->value;
-    // numReqs += 1;
-    // if (aptr->accesses > min_access_ptr->accesses) {
-    //     // exchange
-    //     ulong buf;
-    //     uint8_t abuf;
+    aptr->accesses += 1;
+    if (aptr->accesses > min_access_ptr->accesses) {
+        // exchange
+        ulong buf;
+        uint8_t abuf;
 
-    //     // key
-    //     buf = ptr->key;
-    //     ptr->key = min_access_entry->key;
-    //     min_access_entry->key = buf;
+        // key
+        buf = ptr->key;
+        ptr->key = min_access_entry->key;
+        min_access_entry->key = buf;
 
-    //     // value
-    //     buf = ptr->value;
-    //     ptr->value = min_access_entry->value;
-    //     min_access_entry->value = buf;
+        // value
+        buf = ptr->value;
+        ptr->value = min_access_entry->value;
+        min_access_entry->value = buf;
 
-    //     // accesses
-    //     abuf = aptr->accesses;
-    //     aptr->accesses = min_access_ptr->accesses;
-    //     min_access_ptr->accesses = abuf;
-    // }
+        // accesses
+        abuf = aptr->accesses;
+        aptr->accesses = min_access_ptr->accesses;
+        min_access_ptr->accesses = abuf;
+    }
 }
 
 inline void ChainedAdaptive::_insert(HashmapReq *r) {

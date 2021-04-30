@@ -38,6 +38,7 @@ private:
     int sample_size = 1000;
     ulong displacement = 0;
     ulong displacement_sq = 0;
+    ulong statReqCount = 0;
 
     // Algorithm parameters
     ulong epochSize = 0;
