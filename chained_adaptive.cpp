@@ -100,6 +100,10 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             }
             if (i == count) break;
             // Calculate u0, v0, w0
+            u0 = double(displacement)/double(statReqCount);
+            v0 = double(displacement_sq)/double(statReqCount-1) -
+                double(displacement*displacement)/(double(statReqCount)*double(statReqCount-1));
+            w0 = sqrt(((-1*log(1-confidence_prct))*2*v0)/statReqCount);
             numReqsSlab += epochSize*(periodicity - 1);
             mode = DEFAULT;
         }
@@ -154,9 +158,19 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             }
             if (i == count) break;
             // calculate u1, v1, w1, and compare to u0, v0, w0
-            numReqsSlab += epochSize;
-            mode = ADAPTIVE;
-            // otherwise mode=DEFAULT
+            u1 = double(displacement)/double(statReqCount);
+            v1 = double(displacement_sq)/double(statReqCount-1) -
+                double(displacement*displacement)/(double(statReqCount)*double(statReqCount-1));
+            w1 = sqrt(((-1*log(1-confidence_prct))*2*v1)/statReqCount);
+            if (abs(u0-u1) > (w0+w1)) {
+                // dist has shifted with 90% probability
+                numReqsSlab += epochSize;
+                mode = ADAPTIVE;
+            } else {
+                // dist has not shifted with 90% probability
+                numReqsSlab += periodicity*epochSize;
+                mode = DEFAULT;
+            }
         }
     }
     // Handle the remaining requests countReal - count, should be < 10
