@@ -14,6 +14,11 @@
 
 using namespace std;
 
+// Initial key popularity orders
+#define RANDOM  0
+#define SORTED  1
+#define REVERSE 2
+
 class Workload {
 private:
     // Params
@@ -26,6 +31,7 @@ private:
     float insertProportion = 0;
     float updateProportion = 0;
     float deleteProportion = 0;
+    int keyorder = RANDOM;
 
     Hashmap *hm;
     string workloadFile;
@@ -44,6 +50,7 @@ private:
     void _choosePrime();
     ulong _random();
     void _random_shuffle(ulong*, ulong);
+    void _reverse(ulong*, ulong);
     void _genFetchReq(HashmapReq*, ulong);
     void _genInsertReq(HashmapReq*, ulong);
     void _genUpdateReq(HashmapReq*, ulong);

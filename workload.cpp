@@ -70,6 +70,16 @@ Workload::Workload(string filename) {
             } else if (strcmp(val, "chainedAdaptive") == 0) {
                 this->hm = new ChainedAdaptive();
             }
+        } else if (strcmp(property, "keyorder") == 0) {
+            if (strcmp(val, "random") == 0) {
+                this->keyorder = RANDOM;
+            } else if (strcmp(val, "sorted") == 0) {
+                this->keyorder = SORTED;
+            } else if (strcmp(val, "reverse") == 0) {
+                this->keyorder = REVERSE;
+            } else {
+                this->keyorder = RANDOM;
+            }
         }
     }
     if (this->hm == NULL) {
@@ -173,7 +183,12 @@ inline void Workload::initHashmap() {
     hm->bulkLoad(popOrder, initialSize);
     this->cardinality = initialSize;
     this->maxInsertedIdx = initialSize-1;
-    this->_random_shuffle(popOrder, initialSize);
+    if (this->keyorder == RANDOM) {
+        this->_random_shuffle(popOrder, initialSize);
+    } else if (this->keyorder == SORTED) {
+        // key inserted at the end is in the most favorable spot
+        this->_reverse(popOrder, initialSize);
+    }
 }
 
 void Workload::storeOutput() {
@@ -349,5 +364,18 @@ void Workload::_random_shuffle(ulong *array, ulong len) {
             array[i] = array[pos];
             array[pos] = swap;
         }
+    }
+}
+
+void Workload::_reverse(ulong *array, ulong len) {
+    ulong start = 0;
+    ulong end = len - 1;
+    ulong buf;
+    while (start < end) {
+        buf = array[start];
+        array[start] = array[end];
+        array[end] = buf;
+        start += 1;
+        end -= 1;
     }
 }
