@@ -209,6 +209,7 @@ void ChainedAdaptive::rehash() {
     ulong old_hmsize = hmsize;
     this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
+    epochSize = hmsize/epoch_size_factor;
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
     entries = (KV*)malloc(sizeof(KV)*hmsize*1.5);
     accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
