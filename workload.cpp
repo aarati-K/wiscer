@@ -80,6 +80,8 @@ Workload::Workload(string filename) {
             } else {
                 this->keyorder = RANDOM;
             }
+        } else if (strcmp(property, "outputFile") == 0) {
+            this->outputFile = val;
         }
     }
     if (this->hm == NULL) {
@@ -192,7 +194,7 @@ inline void Workload::initHashmap() {
 }
 
 void Workload::storeOutput() {
-    ofstream output("output.txt");
+    ofstream output(this->outputFile);
     ulong numBatches = this->operationCount/this->batchSize;
     if (this->operationCount % this->batchSize > 0) {
         numBatches += 1;

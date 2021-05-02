@@ -32,6 +32,7 @@ private:
     float updateProportion = 0;
     float deleteProportion = 0;
     int keyorder = RANDOM;
+    char* outputFile = "output.txt";
 
     Hashmap *hm;
     string workloadFile;
