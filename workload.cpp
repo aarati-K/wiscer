@@ -105,8 +105,8 @@ void Workload::run() {
     initHashmap();
 
     // Run
-    HashmapReq *reqs = (HashmapReq*)malloc(sizeof(HashmapReq)*this->batchSize);
-    memset(reqs, 0, sizeof(HashmapReq)*this->batchSize);
+    HashmapReq *reqs = (HashmapReq*)malloc(sizeof(HashmapReq)*this->operationCount);
+    memset(reqs, 0, sizeof(HashmapReq)*this->operationCount);
     ulong numBatches = this->operationCount/this->batchSize;
     if (this->operationCount % this->batchSize > 0) {
         numBatches += 1;
@@ -121,32 +121,33 @@ void Workload::run() {
     ulong r;
     ulong timeElapsed;
     ulong totalTime = 0;
+    /* First generate the operations */
+    for (ulong i = 0; i<this->operationCount; i++) {
+        r = random() % 100;
+        if (r < fetchSlab) {
+            // req_type = FETCH_REQ;
+            this->_genFetchReq(reqs, i);
+        } else if (r < insertSlab && r >= fetchSlab) {
+            // req_type = INSERT_REQ;
+            this->_genInsertReq(reqs, i);
+        } else if (r < deleteSlab && r >= insertSlab) {
+            // req_type = DELETE_REQ;
+            this->_genDeleteReq(reqs, i);
+        } else if (r < updateSlab && r >= deleteSlab) {
+            // req_type = UPDATE_REQ;
+            this->_genUpdateReq(reqs, i);
+        }
+        requestsIssued += 1;
+        if (requestsIssued % distShiftFreq == 0) {
+            this->_shiftDist();
+        }
+    }
     for (ulong i=0; i<numBatches; i++) {
         ulong batchSize = this->batchSize;
         if (i == numBatches - 1 && (this->operationCount % this->batchSize) > 0) {
             batchSize = this->operationCount % this->batchSize;
         }
-        for (ulong j=0; j<batchSize; j++) { //
-            r = random() % 100;
-            if (r < fetchSlab) {
-                // req_type = FETCH_REQ;
-                this->_genFetchReq(reqs, j);
-            } else if (r < insertSlab && r >= fetchSlab) {
-                // req_type = INSERT_REQ;
-                this->_genInsertReq(reqs, j);
-            } else if (r < deleteSlab && r >= insertSlab) {
-                // req_type = DELETE_REQ;
-                this->_genDeleteReq(reqs, j);
-            } else if (r < updateSlab && r >= deleteSlab) {
-                // req_type = UPDATE_REQ;
-                this->_genUpdateReq(reqs, j);
-            }
-            requestsIssued += 1;
-            if (requestsIssued % distShiftFreq == 0) {
-                this->_shiftDist();
-            }
-        }
-        timeElapsed = hm->processRequests(reqs, batchSize); // us
+        timeElapsed = hm->processRequests(&reqs[i*(this->batchSize)], batchSize); // us
         throughput[i] = (1000000*batchSize)/timeElapsed;
         totalTime += timeElapsed;
         hm->rehash(); // Do rehashing if necessary
