@@ -243,7 +243,7 @@ void ChainedAdaptive::free() {
 inline ulong ChainedAdaptive::_random() {
     ulong r = (ulong)random();
     r = r<<31;
-    r = r + (ulong)random;
+    r = r + (ulong)random();
     return r;
 }
 

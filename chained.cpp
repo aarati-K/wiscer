@@ -87,7 +87,7 @@ void ChainedHashmap::free() {
 inline ulong ChainedHashmap::_random() {
     ulong r = (ulong)random();
     r = r<<31;
-    r = r + (ulong)random;
+    r = r + (ulong)random();
     return r;
 }
 
