@@ -1,6 +1,6 @@
-zipf=3
+zipf=1
 initialSize=10000000
-operationCount=1000000000
+operationCount=100000000
 distShiftFreq=1000000001
 distShiftPrct=0
 fetchProportion=1
@@ -9,4 +9,4 @@ deleteProportion=0
 updateProportion=0
 storageEngine=chained
 keyorder=random
-outputFile=output/zipf_3_chained_default_1B
+outputFile=output/zipf_1_chained_default_1B

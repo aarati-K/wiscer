@@ -1,6 +1,6 @@
 zipf=0.5
 initialSize=10000000
-operationCount=1000000000
+operationCount=100000000
 distShiftFreq=1000000001
 distShiftPrct=0
 fetchProportion=1
