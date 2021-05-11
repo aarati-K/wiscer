@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include "metrics.h"
 
 using namespace std;
 
@@ -34,7 +35,7 @@ public:
     Hashmap() {}
     virtual void initHashpower(int) = 0;
     virtual void bulkLoad(ulong*, ulong) = 0;
-    virtual ulong processRequests(HashmapReq*, ulong) = 0;
+    virtual Metrics processRequests(HashmapReq*, ulong) = 0;
     virtual void rehash() = 0;
     virtual void free() = 0;
 };

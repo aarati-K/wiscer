@@ -119,7 +119,7 @@ void Workload::run() {
         this->deleteProportion)*100;
     float updateSlab = 100;
     ulong r;
-    ulong timeElapsed;
+    Metrics m;
     ulong totalTime = 0;
     /* First generate the operations */
     for (ulong i = 0; i<this->operationCount; i++) {
@@ -147,9 +147,9 @@ void Workload::run() {
         if (i == numBatches - 1 && (this->operationCount % this->batchSize) > 0) {
             batchSize = this->operationCount % this->batchSize;
         }
-        timeElapsed = hm->processRequests(&reqs[i*(this->batchSize)], batchSize); // us
-        throughput[i] = (1000000*batchSize)/timeElapsed;
-        totalTime += timeElapsed;
+        m = hm->processRequests(&reqs[i*(this->batchSize)], batchSize); // us
+        throughput[i] = (1000000*batchSize)/m.timeElapsedus;
+        totalTime += m.timeElapsedus;
         hm->rehash(); // Do rehashing if necessary
     }
     cout << "Total time (us): " << totalTime << endl;

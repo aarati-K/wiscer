@@ -23,7 +23,7 @@ public:
     ChainedHashmap();
     void initHashpower(int);
     void bulkLoad(ulong*, ulong);
-    ulong processRequests(HashmapReq*, ulong);
+    Metrics processRequests(HashmapReq*, ulong);
     void rehash();
     void free();
 

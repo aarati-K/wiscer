@@ -26,9 +26,9 @@ void ChainedHashmap::bulkLoad(ulong *keys, ulong num_keys) {
     this->cardinality = num_keys;
 }
 
-ulong ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
-    ulong time_elapsed_us;
-    clock_gettime(CLOCK_MONOTONIC, &startTime);
+Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
+    Metrics m;
+    getMetricsStart(m);
     for (ulong i=0; i<count; i++) {
         switch (reqs[i].reqType) {
             case FETCH_REQ:
@@ -47,9 +47,8 @@ ulong ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
                 break;
         }
     }
-    clock_gettime(CLOCK_MONOTONIC, &endTime);
-    time_elapsed_us = _getTimeDiff(startTime, endTime);
-    return time_elapsed_us;
+    getMetricsEnd(m);
+    return m;
 }
 
 void ChainedHashmap::rehash() {

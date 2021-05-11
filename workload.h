@@ -11,6 +11,7 @@
 #include "hashmap.h"
 #include "chained.h"
 #include "chained_adaptive.h"
+#include "metrics.h"
 
 using namespace std;
 

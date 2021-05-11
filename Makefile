@@ -5,6 +5,9 @@ default: benchmark
 workload.o: workload.cpp workload.h
 	$(CC) -c workload.cpp
 
+metrics.o: metrics.cpp metrics.h
+	$(CC) -c metrics.cpp
+
 chained.o: chained.cpp chained.h hashmap.h
 	$(CC) -c chained.cpp
 
@@ -14,8 +17,8 @@ chained_adaptive.o: chained_adaptive.h chained_adaptive.cpp hashmap.h
 main.o: main.cpp
 	$(CC) -c main.cpp
 
-benchmark: main.o workload.o chained.o chained_adaptive.o
-	$(CC) -o benchmark.out main.o workload.o chained.o chained_adaptive.o
+benchmark: main.o workload.o metrics.o chained.o chained_adaptive.o
+	$(CC) -o benchmark.out main.o workload.o metrics.o chained.o chained_adaptive.o
 
 clean:
 	rm -f *.o

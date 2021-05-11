@@ -41,9 +41,9 @@ void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
     this->cardinality = num_keys;
 }
 
-ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
-    ulong time_elapsed_us;
-    clock_gettime(CLOCK_MONOTONIC, &startTime);
+Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
+    Metrics m;
+    getMetricsStart(m);
     ulong i = 0, j;
     ulong countReal = count;
     // make this a multiple of 10, to avoid inner for loop check for i < count
@@ -192,9 +192,8 @@ ulong ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                 break;
         }
     }
-    clock_gettime(CLOCK_MONOTONIC, &endTime);
-    time_elapsed_us = _getTimeDiff(startTime, endTime);
-    return time_elapsed_us;
+    getMetricsEnd(m);
+    return m;
 }
 
 void ChainedAdaptive::rehash() {
