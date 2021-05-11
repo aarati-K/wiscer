@@ -6,9 +6,10 @@ do
     echo workloads/zipf_${z}_chained_default_1B
     taskset -c 20 ./benchmark.out workloads/zipf_${z}_chained_default_1B
     echo "--------"
-    sleep 10
+    sleep 30
 
     echo workloads/zipf_${z}_chained_sorted_1B
     taskset -c 20 ./benchmark.out workloads/zipf_${z}_chained_sorted_1B
     echo "--------"
+    sleep 30
 done
