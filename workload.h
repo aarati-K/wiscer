@@ -43,7 +43,13 @@ private:
     ulong cardinality = 0;
     ulong maxInsertedIdx = 0;
     ulong requestsIssued = 0;
+
+    // Metrics
     ulong *throughput;
+    ulong *retdInsts;
+    ulong *l3Misses;
+    ulong *l2Misses;
+    ulong *l1Misses;
 
     // Random prime numbers to choose from
     ulong chosenPrime[2];

@@ -112,6 +112,10 @@ void Workload::run() {
         numBatches += 1;
     }
     this->throughput = (ulong*)malloc(sizeof(ulong)*numBatches);
+    this->retdInsts = (ulong*)malloc(sizeof(ulong)*numBatches);
+    this->l3Misses = (ulong*)malloc(sizeof(ulong)*numBatches);
+    this->l2Misses = (ulong*)malloc(sizeof(ulong)*numBatches);
+    this->l1Misses = (ulong*)malloc(sizeof(ulong)*numBatches);
     memset(this->throughput, 0, sizeof(ulong)*numBatches);
     float fetchSlab = this->fetchProportion*100;
     float insertSlab = (this->fetchProportion + this->insertProportion)*100;
@@ -149,13 +153,17 @@ void Workload::run() {
         }
         m = hm->processRequests(&reqs[i*(this->batchSize)], batchSize); // us
         throughput[i] = (1000000*batchSize)/m.timeElapsedus;
+        retdInsts[i] = m.retiredInst;
+        l3Misses[i] = m.l3Miss;
+        l2Misses[i] = m.l2Miss;
+        l1Misses[i] = m.l1Miss;
         totalTime += m.timeElapsedus;
         hm->rehash(); // Do rehashing if necessary
     }
     cout << "Total time (us): " << totalTime << endl;
-    std::free(reqs);
-    this->hm->free();
     storeOutput();
+    std::free(reqs);
+    this->free();
 }
 
 inline void Workload::initHashmap() {
@@ -202,7 +210,12 @@ void Workload::storeOutput() {
         numBatches += 1;
     }
     for (ulong i=0; i<numBatches; i++) {
-        output << throughput[i] << endl;
+        output << throughput[i] << " " 
+            << retdInsts[i] << " "
+            << l3Misses[i] << " "
+            << l2Misses[i] << " "
+            << l1Misses[i]
+            << endl;
     }
     output.close();
 }
@@ -325,7 +338,11 @@ void Workload::free() {
     std::free((void*)this->popOrder);
     std::free((void*)this->cumProb);
     std::free((void*)this->throughput);
-    // hm->free();
+    std::free((void*)this->retdInsts);
+    std::free((void*)this->l3Misses);
+    std::free((void*)this->l2Misses);
+    std::free((void*)this->l1Misses);
+    hm->free();
 }
 
 inline ulong Workload::_multAddHash(ulong i) {
