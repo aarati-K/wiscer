@@ -1,0 +1,12 @@
+zipf=5
+initialSize=10000000
+operationCount=100000000
+distShiftFreq=1000000001
+distShiftPrct=0
+fetchProportion=1
+insertProportion=0
+deleteProportion=0
+updateProportion=0
+storageEngine=chained
+keyorder=random
+outputFile=output/zipf_5_chained_default_100M
