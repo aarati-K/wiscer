@@ -154,6 +154,7 @@ void Workload::run() {
     }
     cout << "Total time (us): " << totalTime << endl;
     std::free(reqs);
+    this->hm->free();
     storeOutput();
 }
 
