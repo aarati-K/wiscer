@@ -9,4 +9,4 @@ deleteProportion=0
 updateProportion=0
 storageEngine=chained
 keyorder=sorted
-outputFile=output/zipf_0.5_chained_sorted_1B
+outputFile=output/zipf_0.5_chained_sorted_100M

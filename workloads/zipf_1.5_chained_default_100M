@@ -9,4 +9,4 @@ deleteProportion=0
 updateProportion=0
 storageEngine=chained
 keyorder=random
-outputFile=output/zipf_1.5_chained_default_1B
+outputFile=output/zipf_1.5_chained_default_100M
