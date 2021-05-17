@@ -89,6 +89,10 @@ Workload::Workload(string filename) {
     }
 }
 
+void Workload::setRandomSeed(uint seed) {
+    srand(seed);
+}
+
 void Workload::printParams() {
     cout << "zipf: " << this->zipf << endl;
     cout << "initialSize: " << this->initialSize << endl;
@@ -354,7 +358,7 @@ inline ulong Workload::_multAddHash(ulong i) {
 }
 
 void Workload::_choosePrime() {
-    srand(0);
+    // srand(0);
     ulong primes[10] = {7761362401859887,
         5937911637806579,
         4062741855079417,

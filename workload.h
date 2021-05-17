@@ -79,6 +79,7 @@ public:
         string storageEngine
     );
     Workload(string filename);
+    void setRandomSeed(uint);
     void printParams();
     void initHashmap();
     void storeOutput();
