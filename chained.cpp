@@ -28,6 +28,7 @@ void ChainedHashmap::bulkLoad(ulong *keys, ulong num_keys) {
 
 Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
     Metrics m;
+    m.displacement = displacement;
     getMetricsStart(m);
     for (ulong i=0; i<count; i++) {
         switch (reqs[i].reqType) {
@@ -48,6 +49,7 @@ Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
         }
     }
     getMetricsEnd(m);
+    m.displacement = displacement - m.displacement;
     return m;
 }
 
@@ -105,9 +107,11 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
+        displacement += 1;
         ptr = ptr->next;
     }
     if (ptr != NULL) {
+        displacement += 1;
         r->value = ptr->value;
         numReqs += 1;
     }

@@ -17,6 +17,7 @@ private:
     KV *entries;
     ulong entriesOffset = 0;
     ulong numReqs = 0;
+    ulong displacement;
     struct timespec startTime, endTime;
 
 public:
