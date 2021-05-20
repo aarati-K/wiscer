@@ -113,6 +113,7 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
     if (ptr != NULL) {
         displacement += 1;
         r->value = ptr->value;
+        ptr->counter += 1;
         numReqs += 1;
     }
 }

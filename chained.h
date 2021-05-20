@@ -8,6 +8,7 @@ using namespace std;
 typedef struct KV {
     ulong key;
     ulong value;
+    uint8_t counter;
     struct KV* next;
 } KV;
 
