@@ -19,6 +19,7 @@ private:
     ulong entriesOffset = 0;
     ulong numReqs = 0;
     ulong displacement;
+    ulong dummy = 0;
     struct timespec startTime, endTime;
 
 public:

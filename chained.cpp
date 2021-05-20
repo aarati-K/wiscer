@@ -115,6 +115,7 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
         r->value = ptr->value;
         ptr->counter += 1;
         numReqs += 1;
+        dummy += ptr->counter;
     }
 }
 
