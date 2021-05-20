@@ -1,12 +1,15 @@
 #!/bin/bash
 
 make
-mkdir adding_counter_zipf1
-for i in {1..10}
+for z in {0..5}
 do
-    echo ${i}
-    taskset -c 39 ./benchmark.out workloads/zipf_1_chained_default_100M
+    mkdir -p adding_counter_zipf${z}
+    echo "zipf${z}"
+    for i in {1..10}
+    do
+        taskset -c 39 ./benchmark.out workloads/zipf_${z}_chained_default_100M
+        cp output/zipf_${z}_chained_default_100M_adding_counter adding_counter_zipf${z}/${i}
+        sleep 10
+    done
     echo "--------"
-    cp output/zipf_1_chained_default_100M_adding_counter adding_counter_zipf1/${i}
-    sleep 10
 done
