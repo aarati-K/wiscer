@@ -89,6 +89,10 @@ Workload::Workload(string filename) {
     }
 }
 
+void Workload::setRandomSeed(uint seed) {
+    srand(seed);
+}
+
 void Workload::printParams() {
     cout << "zipf: " << this->zipf << endl;
     cout << "initialSize: " << this->initialSize << endl;
@@ -116,6 +120,7 @@ void Workload::run() {
     this->l3Misses = (ulong*)malloc(sizeof(ulong)*numBatches);
     this->l2Misses = (ulong*)malloc(sizeof(ulong)*numBatches);
     this->l1Misses = (ulong*)malloc(sizeof(ulong)*numBatches);
+    this->displacement = (ulong*)malloc(sizeof(ulong)*numBatches);
     memset(this->throughput, 0, sizeof(ulong)*numBatches);
     float fetchSlab = this->fetchProportion*100;
     float insertSlab = (this->fetchProportion + this->insertProportion)*100;
@@ -157,6 +162,7 @@ void Workload::run() {
         l3Misses[i] = m.l3Miss;
         l2Misses[i] = m.l2Miss;
         l1Misses[i] = m.l1Miss;
+        displacement[i] = m.displacement;
         totalTime += m.timeElapsedus;
         hm->rehash(); // Do rehashing if necessary
     }
@@ -214,7 +220,8 @@ void Workload::storeOutput() {
             << retdInsts[i] << " "
             << l3Misses[i] << " "
             << l2Misses[i] << " "
-            << l1Misses[i]
+            << l1Misses[i] << " "
+            << displacement[i]
             << endl;
     }
     output.close();
@@ -342,6 +349,7 @@ void Workload::free() {
     std::free((void*)this->l3Misses);
     std::free((void*)this->l2Misses);
     std::free((void*)this->l1Misses);
+    std::free((void*)this->displacement);
     hm->free();
 }
 
@@ -350,6 +358,7 @@ inline ulong Workload::_multAddHash(ulong i) {
 }
 
 void Workload::_choosePrime() {
+    // srand(0);
     ulong primes[10] = {7761362401859887,
         5937911637806579,
         4062741855079417,
@@ -363,8 +372,10 @@ void Workload::_choosePrime() {
     int i = random() % 10;
     this->chosenPrime[0] = primes[i];
 
-    i = random() % 10;
-    this->chosenPrime[1] = primes[i];
+    do {
+        i = random() % 10;
+        this->chosenPrime[1] = primes[i];
+    } while (this->chosenPrime[0] == this->chosenPrime[1]);
 }
 
 inline ulong Workload::_random() {

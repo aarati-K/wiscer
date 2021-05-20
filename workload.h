@@ -50,6 +50,7 @@ private:
     ulong *l3Misses;
     ulong *l2Misses;
     ulong *l1Misses;
+    ulong *displacement;
 
     // Random prime numbers to choose from
     ulong chosenPrime[2];
@@ -78,6 +79,7 @@ public:
         string storageEngine
     );
     Workload(string filename);
+    void setRandomSeed(uint);
     void printParams();
     void initHashmap();
     void storeOutput();

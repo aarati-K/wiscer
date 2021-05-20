@@ -15,6 +15,7 @@ typedef struct Metrics {
     ulong l3Miss;
     ulong l2Miss;
     ulong l1Miss;
+    ulong displacement;
 } Metrics;
 
 unsigned long getTimeDiff(struct timespec, struct  timespec);
