@@ -179,31 +179,37 @@ inline void Workload::initHashmap() {
     hm->initHashpower(hashpower);
     this->_choosePrime();
 
-    ulong finalSize = this->initialSize + this->insertProportion*operationCount + 1;
+    // safety factor
+    ulong finalSize = this->initialSize + 2*this->insertProportion*operationCount + 1;
     popOrder = (ulong*)malloc(sizeof(ulong)*finalSize);
     cumProb = (double*)malloc(sizeof(double)*finalSize);
     memset(cumProb, 0, sizeof(double)*finalSize);
     memset(popOrder, 0, sizeof(ulong)*finalSize);
 
-    popOrder[0] = this->_multAddHash(0);
+    if (this->keyorder == SORTED) {
+        popOrderOffset = 2*this->insertProportion*operationCount;
+    }
+
+    popOrder[popOrderOffset] = this->_multAddHash(0);
     cumProb[0] = 1/pow(1, this->zipf);
     cumsum = cumProb[0];
     for (ulong i=1; i<initialSize; i++) {
         /* Mult Add hash function, for generating random ulong numbers */
-        popOrder[i] = this->_multAddHash(i);
+        popOrder[popOrderOffset+i] = this->_multAddHash(i);
         cumProb[i] = 1/pow(i+1, this->zipf);
         cumsum += cumProb[i];
         cumProb[i] += cumProb[i-1];
     }
 
-    hm->bulkLoad(popOrder, initialSize);
+    hm->bulkLoad(&popOrder[popOrderOffset], initialSize);
     this->cardinality = initialSize;
     this->maxInsertedIdx = initialSize-1;
     if (this->keyorder == RANDOM) {
         this->_random_shuffle(popOrder, initialSize);
     } else if (this->keyorder == SORTED) {
         // key inserted at the end is in the most favorable spot
-        this->_reverse(popOrder, initialSize);
+        // this is the VIP configuration
+        this->_reverse(&popOrder[popOrderOffset], initialSize);
     }
 }
 
@@ -253,7 +259,7 @@ inline void Workload::_genFetchReq(HashmapReq *reqs, ulong i) {
         }
     }
     // Set req params
-    reqs[i].key = this->popOrder[high];
+    reqs[i].key = this->popOrder[popOrderOffset+high];
     reqs[i].value = this->_random();
     reqs[i].reqType = FETCH_REQ;
 }
@@ -266,17 +272,24 @@ inline void Workload::_genInsertReq(HashmapReq *reqs, ulong i) {
     reqs[i].key = n;
     reqs[i].value = _random();
     reqs[i].reqType = INSERT_REQ;
-    
-    ulong p = this->_random() % this->cardinality;
-    ulong buf;
-    while (cumProb[p]/cumsum < 0.9) {
-        buf = this->popOrder[p];
-        this->popOrder[p] = n;
-        n = buf;
-        p = this->_random() % (this->cardinality - 1 - p) + p + 1;
+
+    if (this->keyorder == SORTED) {
+        // insert at front
+        popOrderOffset -= 1;
+        this->popOrder[popOrderOffset] = n;
+    } else {
+        // RANDOM keyorder
+        ulong p = this->_random() % this->cardinality;
+        ulong buf;
+        while (cumProb[p]/cumsum < 0.9) {
+            buf = this->popOrder[popOrderOffset+p];
+            this->popOrder[popOrderOffset+p] = n;
+            n = buf;
+            p = this->_random() % (this->cardinality - 1 - p) + p + 1;
+        }
+        // For the last 10% keys, it doesn't matter. Just insert at the end.
+        this->popOrder[popOrderOffset+this->cardinality] = n;
     }
-    // For the last 10% keys, it doesn't matter. Just insert at the end.
-    this->popOrder[this->cardinality] = n;
 
     // set state tracking params
     this->cardinality += 1;
@@ -292,21 +305,21 @@ inline void Workload::_genDeleteReq(HashmapReq *reqs, ulong i) {
     ulong p_old, buf;
 
     // set the request, popOrder[p] has the key to be deleted
-    reqs[i].key = popOrder[p];
+    reqs[i].key = popOrder[popOrderOffset+p];
     reqs[i].value = 0;
     reqs[i].reqType = DELETE_REQ;
 
     // bubble down
     while (cumProb[p]/cumsum < 0.9) {
         p_old = p;
-        buf = popOrder[p];
+        buf = popOrder[popOrderOffset+p];
         p = this->_random() % (this->cardinality - p - 1) + p + 1;
-        this->popOrder[p_old] = this->popOrder[p];
-        this->popOrder[p] = buf;
+        this->popOrder[popOrderOffset+p_old] = this->popOrder[popOrderOffset+p];
+        this->popOrder[popOrderOffset+p] = buf;
     }
 
     // For the last 10% prob, just exchange with the last element
-    popOrder[p] = popOrder[this->cardinality-1];
+    popOrder[popOrderOffset+p] = popOrder[popOrderOffset+this->cardinality-1];
 
     // set state tracking params
     cumsum -= (cumProb[this->cardinality-1] - cumProb[this->cardinality-2]);
@@ -324,9 +337,9 @@ inline void Workload::_shiftDist() {
     do {
         p += 1;
         pnew = this->_random() % (this->cardinality - p - 1) + p + 1;
-        buf = this->popOrder[p];
-        popOrder[p] = popOrder[pnew];
-        popOrder[pnew] = buf;
+        buf = this->popOrder[popOrderOffset+p];
+        popOrder[popOrderOffset+p] = popOrder[popOrderOffset+pnew];
+        popOrder[popOrderOffset+pnew] = buf;
     } while (this->cumProb[p]/this->cumsum < this->distShiftPrct);
 }
 

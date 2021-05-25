@@ -37,6 +37,7 @@ private:
     Hashmap *hm;
     string workloadFile;
     ulong *popOrder;
+    ulong popOrderOffset = 0;
     double *cumProb;
     double cumsum;
     ulong cardinality = 0;
