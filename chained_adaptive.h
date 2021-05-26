@@ -24,7 +24,7 @@ private:
     Acc **accessesDict;
     Acc *accesses;
     ulong entriesOffset = 0;
-    // ulong accessesOffset = 0; // should be entriesOffset + 1
+    ulong accessesOffset = 0;
     ulong numReqs = 0;
     ulong numReqsSlab = 0;
     struct timespec startTime, endTime;
