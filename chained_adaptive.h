@@ -13,7 +13,7 @@ using namespace std;
 
 typedef struct Acc
 {
-    uint accesses = 0;
+    uint8_t accesses = 0;
     struct Acc* next;
 } Acc;
 
