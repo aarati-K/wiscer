@@ -13,9 +13,9 @@ void ChainedHashmap::initHashpower(int hashpower) {
     this->hashpower = hashpower;
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
-    this->entries = (KV*)malloc(sizeof(KV)*hmsize*1.5); // safety factor
+    this->entries = (KV*)malloc(sizeof(KV)*hmsize*20); // safety factor
     memset(this->dict, 0, sizeof(KV*)*hmsize);
-    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->entries, 0, sizeof(KV)*hmsize*20);
     entriesOffset = 0;
 }
 
@@ -64,9 +64,9 @@ void ChainedHashmap::rehash() {
     this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
-    entries = (KV*)malloc(sizeof(KV)*hmsize*1.5);
+    entries = (KV*)malloc(sizeof(KV)*hmsize*20);
     memset(this->dict, 0, sizeof(KV*)*hmsize);
-    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->entries, 0, sizeof(KV)*hmsize*20);
     entriesOffset = 0;
 
     KV* ptr;

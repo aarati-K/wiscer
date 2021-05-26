@@ -18,13 +18,13 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     this->hashpower = hashpower;
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
-    this->entries = (KV*)malloc(sizeof(KV)*hmsize*1.5); // safety factor
+    this->entries = (KV*)malloc(sizeof(KV)*hmsize*20); // safety factor
     this->accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
-    this->accesses = (Acc*)malloc(sizeof(Acc)*hmsize*1.5); // safety factor
+    this->accesses = (Acc*)malloc(sizeof(Acc)*hmsize*20); // safety factor
     memset(this->dict, 0, sizeof(KV*)*hmsize);
-    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->entries, 0, sizeof(KV)*hmsize*20);
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
-    memset(this->accesses, 0, sizeof(Acc)*(hmsize*1.5+1));
+    memset(this->accesses, 0, sizeof(Acc)*(hmsize*20));
     entriesOffset = 0;
     epochSize = hmsize/float(epoch_size_factor);
     mode = ADAPTIVE;
@@ -210,13 +210,13 @@ void ChainedAdaptive::rehash() {
     hmsize = pow(2, hashpower);
     epochSize = hmsize/epoch_size_factor;
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
-    entries = (KV*)malloc(sizeof(KV)*hmsize*1.5);
+    entries = (KV*)malloc(sizeof(KV)*hmsize*20);
     accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
-    accesses = (Acc*)malloc(sizeof(Acc)*hmsize*1.5);
+    accesses = (Acc*)malloc(sizeof(Acc)*hmsize*20);
     memset(this->dict, 0, sizeof(KV*)*hmsize);
-    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->entries, 0, sizeof(KV)*hmsize*20);
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
-    memset(this->accesses, 0, sizeof(Acc)*hmsize*1.5);
+    memset(this->accesses, 0, sizeof(Acc)*hmsize*20);
     entriesOffset = 0;
 
     KV* ptr;
