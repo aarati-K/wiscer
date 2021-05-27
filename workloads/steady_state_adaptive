@@ -1,0 +1,12 @@
+zipf=1
+initialSize=10000000
+operationCount=5000000000
+distShiftFreq=5000000001
+distShiftPrct=0
+fetchProportion=0.8
+insertProportion=0.1
+deleteProportion=0.1
+updateProportion=0
+storageEngine=chainedAdaptive
+keyorder=random
+outputFile=output/steady_state_adaptive

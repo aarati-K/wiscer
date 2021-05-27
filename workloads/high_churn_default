@@ -1,0 +1,12 @@
+zipf=1
+initialSize=10000000
+operationCount=5000000000
+distShiftFreq=100000000
+distShiftPrct=20
+fetchProportion=1
+insertProportion=0
+deleteProportion=0
+updateProportion=0
+storageEngine=chained
+keyorder=random
+outputFile=output/high_churn_default

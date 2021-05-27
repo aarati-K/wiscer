@@ -75,8 +75,6 @@ Workload::Workload(string filename) {
                 this->keyorder = RANDOM;
             } else if (strcmp(val, "sorted") == 0) {
                 this->keyorder = SORTED;
-            } else if (strcmp(val, "reverse") == 0) {
-                this->keyorder = REVERSE;
             } else {
                 this->keyorder = RANDOM;
             }

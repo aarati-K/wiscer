@@ -32,7 +32,7 @@ private:
     int mode = -1;
 
     // Algorithm configuration
-    int periodicity = 40;
+    int periodicity = 80;
     int epoch_size_factor = 1;
     double confidence_prct = 0.95;
     int sample_size = 1000;

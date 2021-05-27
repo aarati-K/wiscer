@@ -296,6 +296,7 @@ inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
     Acc* aptr_prev = NULL;
     if (ptr && !aptr) {
         accessesDict[h] = &accesses[accessesOffset];
+        aptr = &accesses[accessesOffset];
         accessesOffset += 1;
     }
     Acc* min_access_ptr = aptr;

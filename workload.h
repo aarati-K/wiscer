@@ -18,7 +18,6 @@ using namespace std;
 // Initial key popularity orders
 #define RANDOM  0
 #define SORTED  1
-#define REVERSE 2
 
 class Workload {
 private:
