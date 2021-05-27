@@ -380,13 +380,12 @@ inline void ChainedAdaptive::_delete(HashmapReq *r) {
     if (mode == ADAPTIVE) {
         Acc *aprev, *acur; // corresponding pointers in the accesses hm
         aprev = acur = accessesDict[h]; // acc ptr doesn't exist
-        if (!acur) return;
         while (acur && steps) {
             steps -= 1;
             aprev = acur;
             acur = acur->next;
         }
-        if (steps) return; // acc ptr doesn't exist
+        if (steps || !acur) return; // acc ptr doesn't exist
         if (aprev != acur) {
             aprev->next = acur->next;
         } else {
