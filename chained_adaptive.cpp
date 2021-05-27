@@ -453,7 +453,7 @@ inline int ChainedAdaptive::_getHashpower() {
 }
 
 inline void ChainedAdaptive::_resetAccesses() {
-    memset(this->accesses, 0, sizeof(Acc)*(hmsize*20));
+    memset(this->accesses, 0, sizeof(Acc)*(accessesOffset+1));
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
     accessesOffset = 0;
 }
