@@ -110,11 +110,10 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
         displacement += 1;
         ptr = ptr->next;
     }
-    if (ptr != NULL) {
-        displacement += 1;
-        r->value = ptr->value;
-        numReqs += 1;
-    }
+    if (ptr == NULL) return;
+    displacement += 1;
+    r->value = ptr->value;
+    numReqs += 1;
 }
 
 inline void ChainedHashmap::_insert(HashmapReq *r) {
