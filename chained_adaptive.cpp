@@ -315,6 +315,13 @@ inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
         aptr = aptr->next;
     }
     if (ptr == NULL) return;
+    if (!aptr) {
+        // aptr_prev is null only if this is the first entry in the chain
+        // but we have taken care of that case, aptr can't be null
+        aptr_prev->next = &accesses[accessesOffset];
+        aptr = &accesses[accessesOffset];
+        accessesOffset += 1;
+    }
     r->value = ptr->value;
     numReqs += 1;
     aptr->accesses += 1;
