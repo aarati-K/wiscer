@@ -380,13 +380,12 @@ inline void ChainedAdaptive::_delete(HashmapReq *r) {
     if (mode == ADAPTIVE) {
         Acc *aprev, *acur; // corresponding pointers in the accesses hm
         aprev = acur = accessesDict[h]; // acc ptr doesn't exist
-        if (!acur) return;
         while (acur && steps) {
             steps -= 1;
             aprev = acur;
             acur = acur->next;
         }
-        if (steps) return; // acc ptr doesn't exist
+        if (steps || !acur) return; // acc ptr doesn't exist
         if (aprev != acur) {
             aprev->next = acur->next;
         } else {
@@ -453,7 +452,7 @@ inline int ChainedAdaptive::_getHashpower() {
 }
 
 inline void ChainedAdaptive::_resetAccesses() {
-    memset(this->accesses, 0, sizeof(Acc)*(accessesOffset+1));
+    memset(this->accesses, 0, sizeof(Acc)*(accessesOffset));
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
     accessesOffset = 0;
 }
