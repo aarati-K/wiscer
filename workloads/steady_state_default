@@ -1,11 +1,11 @@
 zipf=1
 initialSize=1000000
-operationCount=200000000
-distShiftFreq=200000001
+operationCount=500000000
+distShiftFreq=500000001
 distShiftPrct=0
-fetchProportion=0.95
-insertProportion=0.025
-deleteProportion=0.025
+fetchProportion=0.98
+insertProportion=0.01
+deleteProportion=0.01
 updateProportion=0
 storageEngine=chained
 keyorder=random

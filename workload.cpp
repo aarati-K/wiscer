@@ -121,9 +121,9 @@ void Workload::run() {
     this->displacement = (ulong*)malloc(sizeof(ulong)*numBatches);
     memset(this->throughput, 0, sizeof(ulong)*numBatches);
     float fetchSlab = this->fetchProportion*100;
-    float insertSlab = (this->fetchProportion + this->insertProportion)*100;
-    float deleteSlab = (this->fetchProportion + this->insertProportion + 
-        this->deleteProportion)*100;
+    float deleteSlab = (this->fetchProportion + this->deleteProportion)*100;
+    float insertSlab = (this->fetchProportion + this->deleteProportion +
+        this->insertProportion)*100;
     float updateSlab = 100;
     ulong r;
     Metrics m;
@@ -134,13 +134,13 @@ void Workload::run() {
         if (r < fetchSlab) {
             // req_type = FETCH_REQ;
             this->_genFetchReq(reqs, i);
-        } else if (r < insertSlab && r >= fetchSlab) {
-            // req_type = INSERT_REQ;
-            this->_genInsertReq(reqs, i);
-        } else if (r < deleteSlab && r >= insertSlab) {
+        } else if (r < deleteSlab && r >= fetchSlab) {
             // req_type = DELETE_REQ;
             this->_genDeleteReq(reqs, i);
-        } else if (r < updateSlab && r >= deleteSlab) {
+        } else if (r < insertSlab && r >= deleteSlab) {
+            // req_type = INSERT_REQ;
+            this->_genInsertReq(reqs, i);
+        } else if (r < updateSlab && r >= insertSlab) {
             // req_type = UPDATE_REQ;
             this->_genUpdateReq(reqs, i);
         }

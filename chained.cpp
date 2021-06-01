@@ -57,7 +57,7 @@ void ChainedHashmap::rehash() {
     if (cardinality < hmsize && cardinality > 0.5*hmsize) {
         return;
     }
-    cout << "Rehashing triggered at cardinality " << this->cardinality << endl;
+    cout << "Rehashing triggered at numReqs " << this->numReqs << " cardinality: " << this->cardinality <<  endl;
     KV* old_entries = entries;
     KV** old_dict = dict;
     ulong old_hmsize = hmsize;
@@ -107,11 +107,11 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
-        displacement += 1;
+        // displacement += 1;
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
-    displacement += 1;
+    // displacement += 1;
     r->value = ptr->value;
     numReqs += 1;
 }
@@ -119,12 +119,12 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
 inline void ChainedHashmap::_insert(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
+    numReqs += 1;
     while (ptr && ptr->key != r->key) {
         ptr = ptr->next;
     }
     if (ptr != NULL) {
         ptr->value = r->value;
-        numReqs += 1;
         return;
     }
     // else, insert
@@ -161,7 +161,6 @@ inline void ChainedHashmap::_setFinal(ulong key, ulong value) {
     entries[entriesOffset].next = dict[h];
     dict[h] = &entries[entriesOffset];
     entriesOffset += 1;
-    numReqs += 1;
 }
 
 inline ulong ChainedHashmap::_getTimeDiff(struct timespec startTime, struct timespec endTime) {

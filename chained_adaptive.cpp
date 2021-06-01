@@ -203,7 +203,7 @@ void ChainedAdaptive::rehash() {
     if (cardinality < hmsize && cardinality > 0.5*hmsize) {
         return;
     }
-    cout << "Rehashing triggered at cardinality " << this->cardinality << endl;
+    cout << "Rehashing triggered at numReqs " << this->numReqs << " cardinality: " << this->cardinality <<  endl;
     KV* old_entries = entries;
     KV** old_dict = dict;
     Acc* old_accesses = accesses;
