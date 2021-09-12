@@ -54,7 +54,7 @@ Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
 }
 
 void ChainedHashmap::rehash() {
-    if (cardinality < hmsize && cardinality > 0.5*hmsize) {
+    if (cardinality < 1.5*hmsize && cardinality > 0.5*hmsize) {
         return;
     }
     cout << "Rehashing triggered at numReqs " << this->numReqs << " cardinality: " << this->cardinality <<  endl;
@@ -170,7 +170,7 @@ inline ulong ChainedHashmap::_getTimeDiff(struct timespec startTime, struct time
 
 inline int ChainedHashmap::_getHashpower() {
     int hashpower = 0;
-    while (pow(2, hashpower) < this->cardinality) {
+    while (pow(2, hashpower) < this->cardinality/1.5) {
         hashpower += 1;
     }
     return hashpower;
