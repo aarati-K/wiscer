@@ -1,6 +1,7 @@
 #!/bin/bash
 
-make
+make default
+mkdir -p output
 for s in {0..9}
 do
     for i in {1..10}

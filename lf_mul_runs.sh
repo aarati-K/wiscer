@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make
+make default
 mkdir -p output
 for lf in {0.5,0.75,1,1.25,1.5}
 do
