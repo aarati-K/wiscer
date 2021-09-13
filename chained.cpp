@@ -107,11 +107,11 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
-        // displacement += 1;
+        displacement += 1;
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
-    // displacement += 1;
+    displacement += 1;
     r->value = ptr->value;
     numReqs += 1;
 }
