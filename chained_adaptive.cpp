@@ -444,12 +444,12 @@ inline void ChainedAdaptive::_setFinalSecond(ulong key, ulong value) {
     }
     entriesOffset += 1;
     if (mode == ADAPTIVE) {
-        Acc* acc_head = accessesDict[h];
-        if (!front) {
-            accesses[accessesOffset].next = acc_head->next;
-            acc_head->next = &accesses[accessesOffset];
-        } else {
-            accessesDict[h] = &accesses[accessesOffset];
+        Acc* head = accessesDict[h];
+        accesses[accessesOffset].next = head;
+        accessesDict[h] = &accesses[accessesOffset];
+        if (head) {
+            accesses[accessesOffset].accesses = head->accesses;
+            head->accesses = 0;
         }
         accessesOffset += 1;
     }
