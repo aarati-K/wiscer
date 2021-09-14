@@ -70,6 +70,7 @@ public:
     int _getHashpower();
     void _resetAccesses();
     void _clearCache();
+    void* _alloc(ulong);
 };
 
 #endif // _CHAINED_ADAPTIVE_H_
