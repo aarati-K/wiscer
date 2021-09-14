@@ -4,6 +4,7 @@ make default
 mkdir -p output
 mkdir -p learning_efficiency
 for z in {1,2,3}
+do
     for r in {0.5,1,2,4,8,16,32,64}
     do
         echo hms/hashmap_zipf_${z}_${r}n.out
