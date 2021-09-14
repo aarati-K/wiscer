@@ -103,8 +103,8 @@ void Workload::printParams() {
     cout << "deleteProportion: " << this->deleteProportion << endl;
 }
 
-void Workload::run() {
-    initHashmap();
+void Workload::run(string hmfile) {
+    initHashmap(hmfile);
 
     // Run
     HashmapReq *reqs = (HashmapReq*)malloc(sizeof(HashmapReq)*this->operationCount);
@@ -170,7 +170,7 @@ void Workload::run() {
     this->free();
 }
 
-inline void Workload::initHashmap() {
+inline void Workload::initHashmap(string hmfile) {
     int hashpower = 0;
     while (pow(2, hashpower) < this->initialSize) {
         hashpower += 1;
@@ -196,7 +196,23 @@ inline void Workload::initHashmap() {
         cumProb[i] += cumProb[i-1];
     }
 
-    hm->bulkLoad(popOrder, initialSize);
+    if (!hmfile.length()) {
+        hm->bulkLoad(popOrder, initialSize);
+    } else {
+        ifstream f(hmfile);
+        if (!f.is_open()) {
+            cout << "Could not open input hmfile " << hmfile << endl;
+            exit(1);
+        }
+        ulong* keys = (ulong*)malloc(sizeof(ulong)*initialSize);
+        string l;
+        int i = 0;
+        while (getline(f, l)) {
+            keys[i] = stoul(l);
+            i += 1;
+        }
+        hm->bulkLoad(keys, initialSize);
+    }
     this->cardinality = initialSize;
     this->maxInsertedIdx = initialSize-1;
     if (this->keyorder == RANDOM) {

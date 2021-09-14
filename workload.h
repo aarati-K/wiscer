@@ -80,8 +80,8 @@ public:
     Workload(string filename);
     void setRandomSeed(uint);
     void printParams();
-    void initHashmap();
+    void initHashmap(string hmfile);
     void storeOutput();
-    void run();
+    void run(string hmfile);
     void free();
 };
