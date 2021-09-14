@@ -66,6 +66,7 @@ public:
     void _update(HashmapReq*);
     void _setFinal(ulong, ulong);
     void _setFinalEnd(ulong, ulong);
+    void _setFinalSecond(ulong, ulong);
     ulong _getTimeDiff(struct timespec, struct timespec);
     int _getHashpower();
     void _resetAccesses();

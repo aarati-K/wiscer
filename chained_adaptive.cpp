@@ -363,7 +363,7 @@ inline void ChainedAdaptive::_insert(HashmapReq *r) {
         ptr = ptr->next;
     }
     if (ptr==NULL) {
-        _setFinal(r->key, r->value);
+        _setFinalSecond(r->key, r->value);
         cardinality += 1;
         return;
     }
@@ -425,6 +425,32 @@ inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
     if (mode == ADAPTIVE) {
         accesses[accessesOffset].next = accessesDict[h];
         accessesDict[h] = &accesses[accessesOffset];
+        accessesOffset += 1;
+    }
+}
+
+inline void ChainedAdaptive::_setFinalSecond(ulong key, ulong value) {
+    entries[entriesOffset].key = key;
+    entries[entriesOffset].value = value;
+    ulong h = _murmurHash(key);
+    KV* head = dict[h];
+    bool front = false;
+    if (head) {
+        entries[entriesOffset].next = head->next;
+        head->next = &entries[entriesOffset];
+    } else {
+        front = true;
+        dict[h] = &entries[entriesOffset];
+    }
+    entriesOffset += 1;
+    if (mode == ADAPTIVE) {
+        Acc* acc_head = accessesDict[h];
+        if (!front) {
+            accesses[accessesOffset].next = acc_head->next;
+            acc_head->next = &accesses[accessesOffset];
+        } else {
+            accessesDict[h] = &accesses[accessesOffset];
+        }
         accessesOffset += 1;
     }
 }
