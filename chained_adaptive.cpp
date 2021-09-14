@@ -18,10 +18,10 @@ ChainedAdaptive::ChainedAdaptive() {
 void ChainedAdaptive::initHashpower(int hashpower) {
     this->hashpower = hashpower;
     this->hmsize = pow(2, hashpower);
-    this->dict = (KV**)_alloc(sizeof(KV*)*hmsize);
-    this->entries = (KV*)_alloc(sizeof(KV)*hmsize*20); // safety factor
-    this->accessesDict = (Acc**)_alloc(sizeof(Acc*)*hmsize);
-    this->accesses = (Acc*)_alloc(sizeof(Acc)*hmsize*20); // safety factor
+    this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
+    this->entries = (KV*)malloc(sizeof(KV)*hmsize*20); // safety factor
+    this->accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
+    this->accesses = (Acc*)malloc(sizeof(Acc)*hmsize*20); // safety factor
     memset(this->dict, 0, sizeof(KV*)*hmsize);
     memset(this->entries, 0, sizeof(KV)*hmsize*20);
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
@@ -215,10 +215,10 @@ void ChainedAdaptive::rehash() {
     this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
     epochSize = hmsize/epoch_size_factor;
-    dict = (KV**)_alloc(sizeof(KV*)*hmsize);
-    entries = (KV*)_alloc(sizeof(KV)*hmsize*20);
-    accessesDict = (Acc**)_alloc(sizeof(Acc*)*hmsize);
-    accesses = (Acc*)_alloc(sizeof(Acc)*hmsize*20);
+    dict = (KV**)malloc(sizeof(KV*)*hmsize);
+    entries = (KV*)malloc(sizeof(KV)*hmsize*20);
+    accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
+    accesses = (Acc*)malloc(sizeof(Acc)*hmsize*20);
     memset(this->dict, 0, sizeof(KV*)*hmsize);
     memset(this->entries, 0, sizeof(KV)*hmsize*20);
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
@@ -488,13 +488,4 @@ inline void ChainedAdaptive::_clearCache() {
     for (ulong i=0; i<n; i++) {
         _mm_clflushopt((char*)ptr + 64*i);
     }
-}
-
-inline void* ChainedAdaptive::_alloc(ulong size) {
-    void* ptr;
-    if (posix_memalign(&ptr, 1024, size) != 0) {
-        cout << "posix_memalign failed" << endl;
-        exit(1);
-    }
-    return ptr;
 }
