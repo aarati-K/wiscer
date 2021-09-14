@@ -492,7 +492,7 @@ inline void ChainedAdaptive::_clearCache() {
 
 inline void* ChainedAdaptive::_alloc(ulong size) {
     void* ptr;
-    if (!posix_memalign(&ptr, 1024, size)) {
+    if (posix_memalign(&ptr, 1024, size) != 0) {
         cout << "posix_memalign failed" << endl;
         exit(1);
     }
