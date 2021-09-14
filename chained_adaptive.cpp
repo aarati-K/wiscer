@@ -282,7 +282,7 @@ inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
     ulong disp = 0;
     while (ptr && ptr->key != r->key) {
         // displacementMetric += 1;
-	disp += 1;
+        disp += 1;
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
