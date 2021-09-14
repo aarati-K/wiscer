@@ -22,7 +22,7 @@ chained_dummy.o: chained_dummy.cpp chained_dummy.h
 	$(CC) -c chained_dummy.cpp
 
 chained_adaptive.o: chained_adaptive.h chained_adaptive.cpp hashmap.h
-	$(CC) -c chained_adaptive.cpp
+	$(CC) -march=native -c chained_adaptive.cpp
 
 chained_adaptive_dummy.o: chained_adaptive_dummy.cpp chained_adaptive_dummy.h
 	$(CC) -c chained_adaptive_dummy.cpp

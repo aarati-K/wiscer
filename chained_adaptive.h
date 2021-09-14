@@ -1,5 +1,6 @@
 #include "hashmap.h"
 #include "chained.h"
+#include "x86intrin.h"
 
 using namespace std;
 
@@ -68,6 +69,7 @@ public:
     ulong _getTimeDiff(struct timespec, struct timespec);
     int _getHashpower();
     void _resetAccesses();
+    void _clearCache();
 };
 
 #endif // _CHAINED_ADAPTIVE_H_

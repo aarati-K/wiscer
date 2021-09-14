@@ -76,6 +76,7 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
             if (i == count) break;
             numReqsSlab += sample_size;
             _resetAccesses();
+            _clearCache();
             mode = BENCHMARKING;
             displacement = 0;
             displacement_sq = 0;
@@ -471,4 +472,20 @@ inline void ChainedAdaptive::_resetAccesses() {
     memset(this->accesses, 0, sizeof(Acc)*(accessesOffset));
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
     accessesOffset = 0;
+}
+
+inline void ChainedAdaptive::_clearCache() {
+    void *ptr = this->accesses;
+    ulong sz = sizeof(Acc)*(accessesOffset);
+    ulong n = sz/64; // cache-line size
+    for (ulong i=0; i<n; i++) {
+        _mm_clflushopt((char*)ptr + 64*i);
+    }
+
+    ptr = this->accessesDict;
+    sz = sizeof(Acc*)*hmsize;
+    n = sz/64;
+    for (ulong i=0; i<n; i++) {
+        _mm_clflushopt((char*)ptr + 64*i);
+    }
 }
