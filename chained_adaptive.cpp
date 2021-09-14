@@ -279,13 +279,13 @@ inline void ChainedAdaptive::_fetchDefault(HashmapReq *r) {
 inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
-    ulong disp = displacementMetric;
+    ulong disp = 0;
     while (ptr && ptr->key != r->key) {
-        displacementMetric += 1;
+        // displacementMetric += 1;
+	disp += 1;
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
-    disp = displacementMetric - disp;
     // displacementMetric += 1;
     r->value = ptr->value;
     displacement += disp;
