@@ -9,14 +9,14 @@ echo "workloads/static_popularity_default_zipf0"
 taskset -c 39 ./benchmark.out workloads/static_popularity_default_zipf0
 echo "-------------"
 sleep 10
-# echo "workloads/static_popularity_default_zipf1"
-# taskset -c 39 ./benchmark.out workloads/static_popularity_default_zipf1
-# echo "-------------"
-# sleep 10
-echo "workloads/static_popularity_default_zipf2"
-taskset -c 39 ./benchmark.out workloads/static_popularity_default_zipf2
+echo "workloads/static_popularity_default_zipf1"
+taskset -c 39 ./benchmark.out workloads/static_popularity_default_zipf1
 echo "-------------"
 sleep 10
+# echo "workloads/static_popularity_default_zipf2"
+# taskset -c 39 ./benchmark.out workloads/static_popularity_default_zipf2
+# echo "-------------"
+# sleep 10
 
 # Adaptive
 make adaptive
@@ -24,14 +24,14 @@ echo "workloads/static_popularity_adaptive_zipf0"
 taskset -c 39 ./benchmark.out workloads/static_popularity_adaptive_zipf0
 echo "-------------"
 sleep 10
-# echo "workloads/static_popularity_adaptive_zipf1"
-# taskset -c 39 ./benchmark.out workloads/static_popularity_adaptive_zipf1
-# echo "-------------"
-# sleep 10
-echo "workloads/static_popularity_adaptive_zipf2"
-taskset -c 39 ./benchmark.out workloads/static_popularity_adaptive_zipf2
+echo "workloads/static_popularity_adaptive_zipf1"
+taskset -c 39 ./benchmark.out workloads/static_popularity_adaptive_zipf1
 echo "-------------"
 sleep 10
+# echo "workloads/static_popularity_adaptive_zipf2"
+# taskset -c 39 ./benchmark.out workloads/static_popularity_adaptive_zipf2
+# echo "-------------"
+# sleep 10
 
 # POPULARITY CHURN
 make default
