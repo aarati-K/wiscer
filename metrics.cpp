@@ -3,12 +3,9 @@
 using namespace std;
 
 unsigned long getTimeDiff(struct timespec start_time, struct timespec end_time) {
-#if _COLLECT_METRICS_
     return (unsigned long)((end_time.tv_sec - start_time.tv_sec)*1000000 +
         double(end_time.tv_nsec - start_time.tv_nsec)/1000);
-#else
     return 0;
-#endif
 }
 
 unsigned long rdpmc_retired_inst_all() {
