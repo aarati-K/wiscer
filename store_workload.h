@@ -21,6 +21,9 @@ public:
     Metrics processRequests(HashmapReq*, ulong);
     void rehash();
     void free();
+
+    void _heapify(ulong*, ulong, ulong);
+    void _heapSort(ulong*, ulong);
 };
 
 #endif // _STORE_WORKLOAD_H_
