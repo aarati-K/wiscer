@@ -1,13 +1,16 @@
 CC=g++ -O3
 
-all: main.o workload.o metrics.o chained.o chained_adaptive.o
-	$(CC) -o benchmark.out main.o workload.o metrics.o chained_adaptive.o chained.o
+all: main.o workload.o metrics.o chained.o chained_adaptive.o store_workload.o
+	$(CC) -o benchmark.out main.o workload.o metrics.o chained_adaptive.o chained.o store_workload.o
 
-default: main.o workload.o metrics.o chained.o chained_adaptive_dummy.o
-	$(CC) -o benchmark.out main.o workload.o metrics.o chained.o chained_adaptive_dummy.o
+default: main.o workload.o metrics.o chained.o chained_adaptive_dummy.o store_workload.o
+	$(CC) -o benchmark.out main.o workload.o metrics.o chained.o chained_adaptive_dummy.o store_workload.o
 
-adaptive: main.o workload.o metrics.o chained_dummy.o chained_adaptive.o
-	$(CC) -o benchmark.out main.o workload.o metrics.o chained_adaptive.o chained_dummy.o
+adaptive: main.o workload.o metrics.o chained_dummy.o chained_adaptive.o store_workload.o
+	$(CC) -o benchmark.out main.o workload.o metrics.o chained_adaptive.o chained_dummy.o store_workload.o
+
+store: main.o workload.o metrics.o chained_dummy.o chained_adaptive_dummy.o store_workload.o
+	$(CC) -o benchmark.out main.o workload.o metrics.o chained_dummy.o chained_adaptive_dummy.o store_workload.o
 
 workload.o: workload.cpp workload.h
 	$(CC) -c workload.cpp
@@ -26,6 +29,9 @@ chained_adaptive.o: chained_adaptive.h chained_adaptive.cpp hashmap.h
 
 chained_adaptive_dummy.o: chained_adaptive_dummy.cpp chained_adaptive_dummy.h
 	$(CC) -c chained_adaptive_dummy.cpp
+
+store_workload.o: store_workload.cpp store_workload.h
+	$(CC) -c store_workload.cpp
 
 main.o: main.cpp
 	$(CC) -c main.cpp

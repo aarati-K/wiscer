@@ -26,6 +26,8 @@ Workload::Workload(float zipf,
         // init
     } else if (storageEngine.compare("chainedAdaptive")) {
         this->hm = new ChainedAdaptive();
+    } else if (storageEngine.compare("none")) {
+        this->hm = new StoreWorkload();
     } else {
         this->hm = new ChainedHashmap();
     }

@@ -12,6 +12,7 @@
 #include "chained.h"
 #include "chained_adaptive.h"
 #include "metrics.h"
+#include "store_workload.h"
 
 using namespace std;
 
