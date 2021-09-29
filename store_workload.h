@@ -22,6 +22,7 @@ public:
     void rehash();
     void free();
 
+    void _swap(ulong*, ulong*);
     void _heapify(ulong*, ulong, ulong);
     void _heapSort(ulong*, ulong);
 };
