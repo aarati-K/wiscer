@@ -22,9 +22,8 @@ public:
     void rehash();
     void free();
 
-    void _swap(ulong*, ulong*);
-    void _heapify(ulong*, ulong, ulong);
-    void _heapSort(ulong*, ulong);
+    void _heapify(ulong*, long, long);
+    void _heapSort(ulong*, long);
 };
 
 #endif // _STORE_WORKLOAD_H_

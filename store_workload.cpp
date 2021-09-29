@@ -36,42 +36,42 @@ void StoreWorkload::free() {
 // To heapify a subtree rooted with node i which is
 // an index in arr[]. n is size of heap
 
-void StoreWorkload::_swap(ulong *a, ulong *b) {
-    ulong tmp = *a;
-    *a = *b;
-    *b = tmp;
-}
-
- void StoreWorkload::_heapify(ulong arr[], ulong n, ulong i) {
-    ulong max = i; //Initialize max as root
-    ulong leftChild = 2 * i + 1;
-    ulong rightChild = 2 * i + 2;
-  
-    //If left child is greater than root
-    if (leftChild < n && arr[leftChild] > arr[max])
-      max = leftChild;
-  
-    //If right child is greater than max
-    if (rightChild < n && arr[rightChild] > arr[max])
-      max = rightChild;
-  
-    //If max is not root
-    if (max != i) {
-      swap(arr[i], arr[max]);
-      _heapify(arr, n, max); //heapify the affected sub-tree recursively
+void StoreWorkload::_heapify(ulong arr[], long n, long i)
+{
+    long largest = i; // Initialize largest as root
+    long l = 2 * i + 1; // left = 2*i + 1
+    long r = 2 * i + 2; // right = 2*i + 2
+ 
+    // If left child is larger than root
+    if (l < n && arr[l] > arr[largest])
+        largest = l;
+ 
+    // If right child is larger than largest so far
+    if (r < n && arr[r] > arr[largest])
+        largest = r;
+ 
+    // If largest is not root
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+ 
+        // Recursively heapify the affected sub-tree
+        _heapify(arr, n, largest);
     }
-  }
-  
-  //Main function to perform heap sort
-void StoreWorkload::_heapSort(ulong arr[], ulong n) {
-    //Rearrange array (building heap)
-    for (ulong i = n / 2 - 1; i >= 0; i--)
-      _heapify(arr, n, i);
-  
-    //Extract elements from heap one by one
-    for (ulong i = n - 1; i >= 0; i--) {
-      swap(arr[0], arr[i]); //Current root moved to the end
-  
-      _heapify(arr, i, 0); //calling max heapify on the heap reduced
+}
+ 
+// main function to do heap sort
+void StoreWorkload::_heapSort(ulong arr[], long n)
+{
+    // Build heap (rearrange array)
+    for (long i = n / 2 - 1; i >= 0; i--)
+        _heapify(arr, n, i);
+ 
+    // One by one extract an element from heap
+    for (long i = n - 1; i > 0; i--) {
+        // Move current root to end
+        swap(arr[0], arr[i]);
+ 
+        // call max heapify on the reduced heap
+        _heapify(arr, i, 0);
     }
 }
