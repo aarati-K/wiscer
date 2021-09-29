@@ -22,4 +22,7 @@ Metrics StoreWorkload::processRequests(HashmapReq *reqs, ulong num_reqs) {
 
 void StoreWorkload::rehash() {}
 
-void StoreWorkload::free() {}
+void StoreWorkload::free() {
+    keys_file.close();
+    ops_file.close();
+}
