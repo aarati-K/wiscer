@@ -28,7 +28,7 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     memset(this->accesses, 0, sizeof(Acc)*(hmsize*20));
     entriesOffset = 0;
     accessesOffset = 0;
-    epochSize = hmsize/float(epoch_size_factor);
+    epochSize = hmsize*float(epoch_size_factor);
     mode = ADAPTIVE;
     numReqsSlab = epochSize;
     displacement = 0;
@@ -214,7 +214,7 @@ void ChainedAdaptive::rehash() {
     ulong old_hmsize = hmsize;
     this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
-    epochSize = hmsize/epoch_size_factor;
+    epochSize = hmsize*epoch_size_factor;
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
     entries = (KV*)malloc(sizeof(KV)*hmsize*20);
     accessesDict = (Acc**)malloc(sizeof(Acc*)*hmsize);
