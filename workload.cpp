@@ -71,6 +71,11 @@ Workload::Workload(string filename) {
                 // this->hm = new LinearProbingHashmap();
             } else if (strcmp(val, "chainedAdaptive") == 0) {
                 this->hm = new ChainedAdaptive();
+            } else if (strcmp(val, "none") == 0) {
+                this->hm = new StoreWorkload();
+            } else {
+                // Default
+                this->hm = new ChainedHashmap();
             }
         } else if (strcmp(property, "keyorder") == 0) {
             if (strcmp(val, "random") == 0) {
