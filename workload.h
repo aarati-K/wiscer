@@ -8,6 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
+#include <random>
 #include "hashmap.h"
 #include "chained.h"
 #include "chained_adaptive.h"
@@ -51,6 +52,11 @@ private:
     ulong *l2Misses;
     ulong *l1Misses;
     ulong *displacement;
+
+    // Params for normal distribution
+    ulong mean;
+    ulong stddev;
+    default_random_engine generator;
 
     // Random prime numbers to choose from
     ulong chosenPrime[2];

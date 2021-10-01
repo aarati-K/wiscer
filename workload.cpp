@@ -50,6 +50,10 @@ Workload::Workload(string filename) {
             this->zipf = stof(val);
         } else if (strcmp(property, "initialSize") == 0) {
             this->initialSize = (ulong)stoul(val);
+            this->mean = this->initialSize/2;
+            this->stddev = this->initialSize*0.001;
+            cout << "Mean: " << this->mean << endl;
+            cout << "Stddev: " << this->stddev << endl;
         } else if (strcmp(property, "operationCount") == 0) {
             this->operationCount = (ulong)stoul(val);
         } else if (strcmp(property, "distShiftFreq") == 0) {
@@ -186,32 +190,40 @@ inline void Workload::initHashmap() {
     hm->initHashpower(hashpower);
     this->_choosePrime();
 
-    ulong finalSize = this->initialSize + this->insertProportion*operationCount + 1;
-    popOrder = (ulong*)malloc(sizeof(ulong)*finalSize);
-    cumProb = (double*)malloc(sizeof(double)*finalSize);
-    memset(cumProb, 0, sizeof(double)*finalSize);
-    memset(popOrder, 0, sizeof(ulong)*finalSize);
+    // ulong finalSize = this->initialSize + this->insertProportion*operationCount + 1;
+    // popOrder = (ulong*)malloc(sizeof(ulong)*finalSize);
+    // cumProb = (double*)malloc(sizeof(double)*finalSize);
+    // memset(cumProb, 0, sizeof(double)*finalSize);
+    // memset(popOrder, 0, sizeof(ulong)*finalSize);
 
-    popOrder[0] = this->_multAddHash(0);
-    cumProb[0] = 1/pow(1, this->zipf);
-    cumsum = cumProb[0];
-    for (ulong i=1; i<initialSize; i++) {
-        /* Mult Add hash function, for generating random ulong numbers */
-        popOrder[i] = this->_multAddHash(i);
-        cumProb[i] = 1/pow(i+1, this->zipf);
-        cumsum += cumProb[i];
-        cumProb[i] += cumProb[i-1];
+    // popOrder[0] = this->_multAddHash(0);
+    // cumProb[0] = 1/pow(1, this->zipf);
+    // cumsum = cumProb[0];
+    // for (ulong i=1; i<initialSize; i++) {
+    //     /* Mult Add hash function, for generating random ulong numbers */
+    //     popOrder[i] = this->_multAddHash(i);
+    //     cumProb[i] = 1/pow(i+1, this->zipf);
+    //     cumsum += cumProb[i];
+    //     cumProb[i] += cumProb[i-1];
+    // }
+
+    // hm->bulkLoad(popOrder, initialSize);
+    // this->cardinality = initialSize;
+    // this->maxInsertedIdx = initialSize-1;
+    // if (this->keyorder == RANDOM) {
+    //     this->_random_shuffle(popOrder, initialSize);
+    // } else if (this->keyorder == SORTED) {
+    //     // key inserted at the end is in the most favorable spot
+    //     this->_reverse(popOrder, initialSize);
+    // }
+
+    popOrder = (ulong*)malloc(sizeof(ulong)*initialSize);
+    memset(popOrder, 0, sizeof(ulong)*initialSize);
+    for (ulong i=0; i<initialSize; i++) {
+        popOrder[i] = i;
     }
-
+    // Initialize sequential keys
     hm->bulkLoad(popOrder, initialSize);
-    this->cardinality = initialSize;
-    this->maxInsertedIdx = initialSize-1;
-    if (this->keyorder == RANDOM) {
-        this->_random_shuffle(popOrder, initialSize);
-    } else if (this->keyorder == SORTED) {
-        // key inserted at the end is in the most favorable spot
-        this->_reverse(popOrder, initialSize);
-    }
 }
 
 void Workload::storeOutput() {
@@ -233,39 +245,50 @@ void Workload::storeOutput() {
 }
 
 inline void Workload::_genFetchReq(HashmapReq *reqs, ulong i) {
-    ulong r = this->_random();
-    ulong max = 4611686018427387903L;
-    double slab = double(r)/double(max);
-    slab = slab*this->cumsum;
-    ulong low = 0;
-    ulong high = this->cardinality;
-    ulong mid;
+    // ulong r = this->_random();
+    // ulong max = 4611686018427387903L;
+    // double slab = double(r)/double(max);
+    // slab = slab*this->cumsum;
+    // ulong low = 0;
+    // ulong high = this->cardinality;
+    // ulong mid;
 
-    while ((high - low) > 1){
-        // cout << "high: " << high << ", low: " << low << ", mid: " << mid << endl;
-        if (slab < cumProb[0]) {
-            high = 0;
-            break;
-        } else if (slab > cumProb[this->cardinality-1]) {
-            r = this->_random();
-            slab = double(r)/double(max);
-            slab = slab*this->cumsum;
-            continue;
-        }
-        mid = (low + high)/2;
-        if (this->cumProb[mid] > slab) {
-            high = mid;
-        } else if (this->cumProb[mid] <= slab) {
-            low = mid;
-        }
+    // while ((high - low) > 1){
+    //     // cout << "high: " << high << ", low: " << low << ", mid: " << mid << endl;
+    //     if (slab < cumProb[0]) {
+    //         high = 0;
+    //         break;
+    //     } else if (slab > cumProb[this->cardinality-1]) {
+    //         r = this->_random();
+    //         slab = double(r)/double(max);
+    //         slab = slab*this->cumsum;
+    //         continue;
+    //     }
+    //     mid = (low + high)/2;
+    //     if (this->cumProb[mid] > slab) {
+    //         high = mid;
+    //     } else if (this->cumProb[mid] <= slab) {
+    //         low = mid;
+    //     }
+    // }
+    // // Set req params
+    // reqs[i].key = this->popOrder[high];
+    // reqs[i].value = this->_random();
+    // reqs[i].reqType = FETCH_REQ;
+    normal_distribution<double> distribution(mean, stddev);
+    double rn = distribution(generator);
+    while (!(rn>0 && rn<initialSize-1)) {
+        rn = distribution(generator);
     }
-    // Set req params
-    reqs[i].key = this->popOrder[high];
-    reqs[i].value = this->_random();
+    rn = floor(rn);
+    reqs[i].key = rn;
+    reqs[i].value = rn;
     reqs[i].reqType = FETCH_REQ;
 }
 
 inline void Workload::_genInsertReq(HashmapReq *reqs, ulong i) {
+    cout << "Not implemented!" << endl;
+    exit(1);
     ulong n = _multAddHash(this->maxInsertedIdx + 1);
     this->maxInsertedIdx += 1;
 
@@ -295,6 +318,8 @@ inline void Workload::_genInsertReq(HashmapReq *reqs, ulong i) {
 }
 
 inline void Workload::_genDeleteReq(HashmapReq *reqs, ulong i) {
+    cout << "Not implemented!" << endl;
+    exit(1);
     ulong p = this->_random() % this->cardinality;
     ulong p_old, buf;
 
@@ -326,6 +351,8 @@ inline void Workload::_genUpdateReq(HashmapReq *reqs, ulong i) {
 
 inline void Workload::_shiftDist() {
     if (this->distShiftPrct == 0) return;
+    cout << "Not implemented!" << endl;
+    exit(1);
     ulong p = -1;
     ulong pnew, buf;
     do {
