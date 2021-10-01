@@ -20,6 +20,7 @@ void StoreWorkload::bulkLoad(ulong *keys, ulong num_keys) {
 }
 
 Metrics StoreWorkload::processRequests(HashmapReq *reqs, ulong num_reqs) {
+    // TODO: Store workload to ops file
     Metrics m;
     return m;
 }
