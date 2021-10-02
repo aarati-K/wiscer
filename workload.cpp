@@ -278,7 +278,7 @@ inline void Workload::_genFetchReq(HashmapReq *reqs, ulong i) {
     // reqs[i].reqType = FETCH_REQ;
     lognormal_distribution<double> distribution(mean, stddev);
     double rn = distribution(generator);
-    while (!(rn>0 && rn<initialSize-1)) {
+    while (!(rn>=0 && rn<=initialSize-1)) {
         rn = distribution(generator);
     }
     rn = floor(rn);
