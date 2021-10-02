@@ -219,10 +219,11 @@ inline void Workload::initHashmap() {
 
     popOrder = (ulong*)malloc(sizeof(ulong)*initialSize);
     memset(popOrder, 0, sizeof(ulong)*initialSize);
+    // Initialize sequential keys
     for (ulong i=0; i<initialSize; i++) {
         popOrder[i] = i;
     }
-    // Initialize sequential keys
+    this->_random_shuffle(popOrder, initialSize);
     hm->bulkLoad(popOrder, initialSize);
 }
 
