@@ -50,8 +50,8 @@ Workload::Workload(string filename) {
             this->zipf = stof(val);
         } else if (strcmp(property, "initialSize") == 0) {
             this->initialSize = (ulong)stoul(val);
-            this->mean = this->initialSize/2;
-            this->stddev = this->initialSize*0.001;
+            this->mean = log(this->initialSize/2);
+            this->stddev = 2;
             cout << "Mean: " << this->mean << endl;
             cout << "Stddev: " << this->stddev << endl;
         } else if (strcmp(property, "operationCount") == 0) {
@@ -275,7 +275,7 @@ inline void Workload::_genFetchReq(HashmapReq *reqs, ulong i) {
     // reqs[i].key = this->popOrder[high];
     // reqs[i].value = this->_random();
     // reqs[i].reqType = FETCH_REQ;
-    normal_distribution<double> distribution(mean, stddev);
+    lognormal_distribution<double> distribution(mean, stddev);
     double rn = distribution(generator);
     while (!(rn>0 && rn<initialSize-1)) {
         rn = distribution(generator);

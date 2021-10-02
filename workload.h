@@ -54,8 +54,8 @@ private:
     ulong *displacement;
 
     // Params for normal distribution
-    ulong mean;
-    ulong stddev;
+    double mean;
+    double stddev;
     default_random_engine generator;
 
     // Random prime numbers to choose from
