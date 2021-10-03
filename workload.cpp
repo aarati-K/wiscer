@@ -51,7 +51,7 @@ Workload::Workload(string filename) {
         } else if (strcmp(property, "initialSize") == 0) {
             this->initialSize = (ulong)stoul(val);
             this->mean = log(this->initialSize/2);
-            this->stddev = 2;
+            this->stddev = log(this->initialSize)*0.0125;
             cout << "Mean: " << this->mean << endl;
             cout << "Stddev: " << this->stddev << endl;
         } else if (strcmp(property, "operationCount") == 0) {
