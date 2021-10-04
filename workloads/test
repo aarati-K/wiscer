@@ -1,11 +1,11 @@
 zipf=1
-initialSize=10000000
-operationCount=10000000
-distShiftFreq=10000001
+initialSize=1048576
+operationCount=500000000
+distShiftFreq=500000001
 distShiftPrct=0
 fetchProportion=1
 insertProportion=0
 deleteProportion=0
 updateProportion=0
-storageEngine=chained
+storageEngine=chainedAdaptive
 outputFile=output/test
