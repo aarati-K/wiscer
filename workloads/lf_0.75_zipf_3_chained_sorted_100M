@@ -1,0 +1,12 @@
+zipf=3
+initialSize=12582912
+operationCount=100000000
+distShiftFreq=1000000001
+distShiftPrct=0
+fetchProportion=1
+insertProportion=0
+deleteProportion=0
+updateProportion=0
+storageEngine=chained
+keyorder=sorted
+outputFile=output/lf_0.75_zipf_3_chained_sorted_100M

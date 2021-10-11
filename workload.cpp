@@ -26,6 +26,8 @@ Workload::Workload(float zipf,
         // init
     } else if (storageEngine.compare("chainedAdaptive")) {
         this->hm = new ChainedAdaptive();
+    } else if (storageEngine.compare("none")) {
+        this->hm = new StoreWorkload();
     } else {
         this->hm = new ChainedHashmap();
     }
@@ -69,14 +71,17 @@ Workload::Workload(string filename) {
                 // this->hm = new LinearProbingHashmap();
             } else if (strcmp(val, "chainedAdaptive") == 0) {
                 this->hm = new ChainedAdaptive();
+            } else if (strcmp(val, "none") == 0) {
+                this->hm = new StoreWorkload();
+            } else {
+                // Default
+                this->hm = new ChainedHashmap();
             }
         } else if (strcmp(property, "keyorder") == 0) {
             if (strcmp(val, "random") == 0) {
                 this->keyorder = RANDOM;
             } else if (strcmp(val, "sorted") == 0) {
                 this->keyorder = SORTED;
-            } else if (strcmp(val, "reverse") == 0) {
-                this->keyorder = REVERSE;
             } else {
                 this->keyorder = RANDOM;
             }
@@ -123,9 +128,9 @@ void Workload::run() {
     this->displacement = (ulong*)malloc(sizeof(ulong)*numBatches);
     memset(this->throughput, 0, sizeof(ulong)*numBatches);
     float fetchSlab = this->fetchProportion*100;
-    float insertSlab = (this->fetchProportion + this->insertProportion)*100;
-    float deleteSlab = (this->fetchProportion + this->insertProportion + 
-        this->deleteProportion)*100;
+    float deleteSlab = (this->fetchProportion + this->deleteProportion)*100;
+    float insertSlab = (this->fetchProportion + this->deleteProportion +
+        this->insertProportion)*100;
     float updateSlab = 100;
     ulong r;
     Metrics m;
@@ -136,13 +141,13 @@ void Workload::run() {
         if (r < fetchSlab) {
             // req_type = FETCH_REQ;
             this->_genFetchReq(reqs, i);
-        } else if (r < insertSlab && r >= fetchSlab) {
-            // req_type = INSERT_REQ;
-            this->_genInsertReq(reqs, i);
-        } else if (r < deleteSlab && r >= insertSlab) {
+        } else if (r < deleteSlab && r >= fetchSlab) {
             // req_type = DELETE_REQ;
             this->_genDeleteReq(reqs, i);
-        } else if (r < updateSlab && r >= deleteSlab) {
+        } else if (r < insertSlab && r >= deleteSlab) {
+            // req_type = INSERT_REQ;
+            this->_genInsertReq(reqs, i);
+        } else if (r < updateSlab && r >= insertSlab) {
             // req_type = UPDATE_REQ;
             this->_genUpdateReq(reqs, i);
         }

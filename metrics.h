@@ -7,6 +7,9 @@ using namespace std;
 #ifndef _METRICS_H_
 #define _METRICS_H_
 
+// Change this to 1 to collect metrics
+#define _COLLECT_METRICS_ 0
+
 typedef struct Metrics {
     struct timespec startTime;
     struct timespec endTime;

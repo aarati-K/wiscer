@@ -1,5 +1,6 @@
 #include "hashmap.h"
 #include "chained.h"
+#include "x86intrin.h"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ private:
     Acc **accessesDict;
     Acc *accesses;
     ulong entriesOffset = 0;
-    // ulong accessesOffset = 0; // should be entriesOffset + 1
+    ulong accessesOffset = 0;
     ulong numReqs = 0;
     ulong numReqsSlab = 0;
     struct timespec startTime, endTime;
@@ -32,13 +33,14 @@ private:
     int mode = -1;
 
     // Algorithm configuration
-    int periodicity = 40;
-    int epoch_size_factor = 1;
+    int periodicity = 60;
+    int epoch_size_factor = 1.5;
     double confidence_prct = 0.95;
     int sample_size = 1000;
     ulong displacement = 0;
     ulong displacement_sq = 0;
     ulong statReqCount = 0;
+    ulong displacementMetric = 0;
 
     // Algorithm parameters
     ulong epochSize = 0;
@@ -67,6 +69,7 @@ public:
     ulong _getTimeDiff(struct timespec, struct timespec);
     int _getHashpower();
     void _resetAccesses();
+    void _clearCache();
 };
 
 #endif // _CHAINED_ADAPTIVE_H_

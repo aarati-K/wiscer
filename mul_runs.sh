@@ -1,7 +1,8 @@
 #!/bin/bash
 
-make
-for s in {1..9}
+make default
+mkdir -p output
+for s in {0..9}
 do
     for i in {1..10}
     do
@@ -17,6 +18,7 @@ do
             echo "--------"
             sleep 10
         done
+        mkdir -p runs/${i}
         cp output/*100M runs/${i}
     done
     cp -r runs runs${s}

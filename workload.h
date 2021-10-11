@@ -12,13 +12,13 @@
 #include "chained.h"
 #include "chained_adaptive.h"
 #include "metrics.h"
+#include "store_workload.h"
 
 using namespace std;
 
 // Initial key popularity orders
 #define RANDOM  0
 #define SORTED  1
-#define REVERSE 2
 
 class Workload {
 private:

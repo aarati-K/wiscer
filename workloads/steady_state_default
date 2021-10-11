@@ -1,0 +1,12 @@
+zipf=1
+initialSize=1000000
+operationCount=500000000
+distShiftFreq=500000001
+distShiftPrct=0
+fetchProportion=0.98
+insertProportion=0.01
+deleteProportion=0.01
+updateProportion=0
+storageEngine=chained
+keyorder=random
+outputFile=output/steady_state_default

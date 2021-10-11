@@ -13,9 +13,9 @@ void ChainedHashmap::initHashpower(int hashpower) {
     this->hashpower = hashpower;
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
-    this->entries = (KV*)malloc(sizeof(KV)*hmsize*1.5); // safety factor
+    this->entries = (KV*)malloc(sizeof(KV)*hmsize*20); // safety factor
     memset(this->dict, 0, sizeof(KV*)*hmsize);
-    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->entries, 0, sizeof(KV)*hmsize*20);
     entriesOffset = 0;
 }
 
@@ -54,19 +54,19 @@ Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
 }
 
 void ChainedHashmap::rehash() {
-    if (cardinality < hmsize && cardinality > 0.5*hmsize) {
+    if (cardinality < 1.5*hmsize && cardinality > 0.5*hmsize) {
         return;
     }
-    cout << "Rehashing triggered at cardinality " << this->cardinality << endl;
+    cout << "Rehashing triggered at numReqs " << this->numReqs << " cardinality: " << this->cardinality <<  endl;
     KV* old_entries = entries;
     KV** old_dict = dict;
     ulong old_hmsize = hmsize;
     this->hashpower = _getHashpower();
     hmsize = pow(2, hashpower);
     dict = (KV**)malloc(sizeof(KV*)*hmsize);
-    entries = (KV*)malloc(sizeof(KV)*hmsize*1.5);
+    entries = (KV*)malloc(sizeof(KV)*hmsize*20);
     memset(this->dict, 0, sizeof(KV*)*hmsize);
-    memset(this->entries, 0, sizeof(KV)*hmsize*1.5);
+    memset(this->entries, 0, sizeof(KV)*hmsize*20);
     entriesOffset = 0;
 
     KV* ptr;
@@ -107,25 +107,28 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
+#if _COLLECT_METRICS_
         displacement += 1;
+#endif
         ptr = ptr->next;
     }
-    if (ptr != NULL) {
-        displacement += 1;
-        r->value = ptr->value;
-        numReqs += 1;
-    }
+    if (ptr == NULL) return;
+#if _COLLECT_METRICS_
+    displacement += 1;
+#endif
+    r->value = ptr->value;
+    numReqs += 1;
 }
 
 inline void ChainedHashmap::_insert(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
+    numReqs += 1;
     while (ptr && ptr->key != r->key) {
         ptr = ptr->next;
     }
     if (ptr != NULL) {
         ptr->value = r->value;
-        numReqs += 1;
         return;
     }
     // else, insert
@@ -162,7 +165,6 @@ inline void ChainedHashmap::_setFinal(ulong key, ulong value) {
     entries[entriesOffset].next = dict[h];
     dict[h] = &entries[entriesOffset];
     entriesOffset += 1;
-    numReqs += 1;
 }
 
 inline ulong ChainedHashmap::_getTimeDiff(struct timespec startTime, struct timespec endTime) {
@@ -172,7 +174,7 @@ inline ulong ChainedHashmap::_getTimeDiff(struct timespec startTime, struct time
 
 inline int ChainedHashmap::_getHashpower() {
     int hashpower = 0;
-    while (pow(2, hashpower) < this->cardinality) {
+    while (pow(2, hashpower) < this->cardinality/1.5) {
         hashpower += 1;
     }
     return hashpower;

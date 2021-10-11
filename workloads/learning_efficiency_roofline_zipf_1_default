@@ -1,5 +1,5 @@
 zipf=1
-initialSize=1048576
+initialSize=1000000
 operationCount=500000000
 distShiftFreq=500000001
 distShiftPrct=0
@@ -7,5 +7,6 @@ fetchProportion=1
 insertProportion=0
 deleteProportion=0
 updateProportion=0
-storageEngine=chainedAdaptive
-outputFile=output/test
+storageEngine=chained
+keyorder=random
+outputFile=output/learning_efficiency_roofline_zipf_1_default
