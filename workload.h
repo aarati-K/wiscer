@@ -30,7 +30,6 @@ private:
     float distShiftPrct = 0;
     float fetchProportion = 1;
     float insertProportion = 0;
-    float updateProportion = 0;
     float deleteProportion = 0;
     int keyorder = RANDOM;
     string outputFile = "output.txt";
@@ -62,7 +61,6 @@ private:
     void _reverse(ulong*, ulong);
     void _genFetchReq(HashmapReq*, ulong);
     void _genInsertReq(HashmapReq*, ulong);
-    void _genUpdateReq(HashmapReq*, ulong);
     void _genDeleteReq(HashmapReq*, ulong);
     void _shiftDist();
 
@@ -74,7 +72,6 @@ public:
         float distShiftPrct,
         float fetchProportion,
         float insertProportion,
-        float updateProportion,
         float deleteProportion,
         string storageEngine
     );

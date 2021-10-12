@@ -63,7 +63,6 @@ public:
     void _fetchBenchmark(HashmapReq*);
     void _insert(HashmapReq*);
     void _delete(HashmapReq*);
-    void _update(HashmapReq*);
     void _setFinal(ulong, ulong);
     void _setFinalEnd(ulong, ulong);
     ulong _getTimeDiff(struct timespec, struct timespec);

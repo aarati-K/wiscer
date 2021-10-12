@@ -50,7 +50,6 @@ distShiftPrct=0
 fetchProportion=1
 insertProportion=0
 deleteProportion=0
-updateProportion=0
 storageEngine=VIPHashing
 ```
 

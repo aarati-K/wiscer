@@ -34,7 +34,6 @@ public:
     void _fetch(HashmapReq*);
     void _insert(HashmapReq*);
     void _delete(HashmapReq*);
-    void _update(HashmapReq*);
     void _setFinal(ulong, ulong);
     ulong _getTimeDiff(struct timespec, struct timespec);
     int _getHashpower();

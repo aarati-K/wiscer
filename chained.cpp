@@ -41,9 +41,6 @@ Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
             case DELETE_REQ:
                 _delete(&reqs[i]);
                 break;
-            case UPDATE_REQ:
-                _update(&reqs[i]);
-                break;
             default:
                 break;
         }
@@ -152,10 +149,6 @@ inline void ChainedHashmap::_delete(HashmapReq *r) {
     }
     cardinality -= 1;
     numReqs += 1;
-}
-
-inline void ChainedHashmap::_update(HashmapReq *r) {
-    // skip for now    
 }
 
 inline void ChainedHashmap::_setFinal(ulong key, ulong value) {

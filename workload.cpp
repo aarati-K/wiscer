@@ -7,7 +7,6 @@ Workload::Workload(float zipf,
     float distShiftPrct,
     float fetchProportion,
     float insertProportion,
-    float updateProportion,
     float deleteProportion,
     string storageEngine
 ) {
@@ -18,12 +17,9 @@ Workload::Workload(float zipf,
     this->distShiftPrct = distShiftPrct/10;
     this->fetchProportion = fetchProportion;
     this->insertProportion = insertProportion;
-    this->updateProportion = updateProportion;
     this->deleteProportion = deleteProportion;
     if (storageEngine.compare("chained")) {
         this->hm = new ChainedHashmap();
-    } else if (storageEngine.compare("linearProbing")) {
-        // init
     } else if (storageEngine.compare("chainedAdaptive")) {
         this->hm = new ChainedAdaptive();
     } else if (storageEngine.compare("none")) {
@@ -60,15 +56,11 @@ Workload::Workload(string filename) {
             this->fetchProportion = stof(val);
         } else if (strcmp(property, "insertProportion") == 0) {
             this->insertProportion = stof(val);
-        } else if (strcmp(property, "updateProportion") == 0) {
-            this->updateProportion = stof(val);
         } else if (strcmp(property, "deleteProportion") == 0) {
             this->deleteProportion = stof(val);
         } else if (strcmp(property, "storageEngine") == 0) {
             if (strcmp(val, "chained") == 0) {
                 this->hm = new ChainedHashmap();
-            } else if (strcmp(val, "linearProbing") == 0) {
-                // this->hm = new LinearProbingHashmap();
             } else if (strcmp(val, "chainedAdaptive") == 0) {
                 this->hm = new ChainedAdaptive();
             } else if (strcmp(val, "none") == 0) {
@@ -106,7 +98,6 @@ void Workload::printParams() {
     cout << "distShiftPrct: " << this->distShiftPrct << endl;
     cout << "fetchProportion: " << this->fetchProportion << endl;
     cout << "insertProportion: " << this->insertProportion << endl;
-    cout << "updateProportion: " << this->updateProportion << endl;
     cout << "deleteProportion: " << this->deleteProportion << endl;
 }
 
@@ -131,7 +122,10 @@ void Workload::run() {
     float deleteSlab = (this->fetchProportion + this->deleteProportion)*100;
     float insertSlab = (this->fetchProportion + this->deleteProportion +
         this->insertProportion)*100;
-    float updateSlab = 100;
+    if (insertSlab != 100) {
+        cout << "Invalid request proportions" << endl;
+        exit(1);
+    }
     ulong r;
     Metrics m;
     ulong totalTime = 0;
@@ -147,9 +141,6 @@ void Workload::run() {
         } else if (r < insertSlab && r >= deleteSlab) {
             // req_type = INSERT_REQ;
             this->_genInsertReq(reqs, i);
-        } else if (r < updateSlab && r >= insertSlab) {
-            // req_type = UPDATE_REQ;
-            this->_genUpdateReq(reqs, i);
         }
         requestsIssued += 1;
         if (requestsIssued % distShiftFreq == 0) {
@@ -320,10 +311,6 @@ inline void Workload::_genDeleteReq(HashmapReq *reqs, ulong i) {
     this->cardinality -= 1;
 }
 
-inline void Workload::_genUpdateReq(HashmapReq *reqs, ulong i) {
-    // Not important, skipping for now
-}
-
 inline void Workload::_shiftDist() {
     if (this->distShiftPrct == 0) return;
     ulong p = -1;
@@ -345,7 +332,6 @@ void Workload::free() {
     this->distShiftPrct = 0;
     this->fetchProportion = 1;
     this->insertProportion = 0;
-    this->updateProportion = 0;
     this->deleteProportion = 0;
     std::free((void*)this->popOrder);
     std::free((void*)this->cumProb);

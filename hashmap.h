@@ -16,8 +16,7 @@ using namespace std;
 
 #define FETCH_REQ 0
 #define INSERT_REQ 1
-#define UPDATE_REQ 2
-#define DELETE_REQ 3
+#define DELETE_REQ 2
 
 typedef struct HashmapReq {
     ulong key;

@@ -65,9 +65,6 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                         case DELETE_REQ:
                             _delete(&reqs[i]);
                             break;
-                        case UPDATE_REQ:
-                            _update(&reqs[i]);
-                            break;
                         default:
                             break;
                     }
@@ -94,9 +91,6 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                             break;
                         case DELETE_REQ:
                             _delete(&reqs[i]);
-                            break;
-                        case UPDATE_REQ:
-                            _update(&reqs[i]);
                             break;
                         default:
                             break;
@@ -125,9 +119,6 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                         case DELETE_REQ:
                             _delete(&reqs[i]);
                             break;
-                        case UPDATE_REQ:
-                            _update(&reqs[i]);
-                            break;
                         default:
                             break;
                     }
@@ -152,9 +143,6 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                             break;
                         case DELETE_REQ:
                             _delete(&reqs[i]);
-                            break;
-                        case UPDATE_REQ:
-                            _update(&reqs[i]);
                             break;
                         default:
                             break;
@@ -189,9 +177,6 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
                 break;
             case DELETE_REQ:
                 _delete(&reqs[i]);
-                break;
-            case UPDATE_REQ:
-                _update(&reqs[i]);
                 break;
             default:
                 break;
@@ -421,10 +406,6 @@ inline void ChainedAdaptive::_delete(HashmapReq *r) {
             accessesDict[h] = acur->next;
         }
     }
-}
-
-inline void ChainedAdaptive::_update(HashmapReq *r) {
-    // skip for now    
 }
 
 inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
