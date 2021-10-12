@@ -4,8 +4,8 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 
 ## Table of Contents
 1. [Building & running Wiscer](#buildnrun)
-2. [Configuring workloads](#workload)
-3. [Sample workloads & scripts](#scripts)
+2. [Generating workloads](#workload)
+3. [Sample workloads & Scripts](#scripts)
 4. [Measuring hardware metrics using the Intel PMU](#pmu)
 5. [Good practices](#goodpractices)
 
@@ -22,21 +22,21 @@ $ ./benchmark.out workloads/test
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
 
-## Configuring Workloads <a name="workload"></a>
+## Generating Workloads <a name="workload"></a>
 
 Currently, the workload configuration options that Wiscer supports are:
 
-* `zipf` - Zipfian factor of the workload (zipf=0.0 corresponds to uniform distribution). Valid values are any positive float.
+* `zipf` - Zipfian factor of the workload (zipf=0.0 corresponds to uniform distribution). Valid values are positive floating point.
 * `initialSize` - Initial number of keys in the storage engine (hash table) before running any operations.
 * `operationCount` - Number of operations to issue to the configured storage engine.
 * `insertProportion` - Proportion of insert operations.
 * `fetchProportion` - Proportion of fetch operations.
 * `deleteProportion` - Proportion of delete operations.
 * `distShiftFreq` - A shift in popularity distribution occurs after every `distShiftFreq` operations.
-* `distShiftPrct` - How much shift in popularity distribution occurs. 50% shift corresponds to the top keys contributing to 50% of the probability falling out of the hot set and randomly being replaced by less popular keys.
-* `storageEngine` - What storage engine to use. Options are `ChainedHashing`|`VIPHashing`|`none` (default: `ChainedHashing`).
+* `distShiftPrct` - The popularity distribution shifts by `distShiftPrct` every `distShiftFreq` operations. 50% shift corresponds to the top keys contributing to 50% of the probability falling out of the hot set and randomly being replaced by less popular keys.
+* `storageEngine` - What storage engine to use. Options are `ChainedHashing`|`VIPHashing`|`none` (store workload to disk). Default is `ChainedHashing`.
 * `keyPattern` - Pattern of keys to generate. Options are `random`|`sequential` (default: `random`).
-* `keyOrder` - The popularity rank of keys relative to the initial insertion order. Options are `random` and `sorted` (the last inserted key is the most popular, a.k.a. latest). Default is `random`.
+* `keyOrder` - The popularity rank of keys relative to the initial insertion order. Options are `random`|`sorted` (the last inserted key is the most popular, a.k.a. latest). Default is `random`.
 * `outputFile` - Where to store the output of the workload. Default is `output.txt`.
 
 The test workload (file `workloads/test`) that we ran has the following configuration options:
@@ -60,24 +60,24 @@ Stated in words, 500M fetch operations with low skew (`zipf` = 1) are issued to 
 
 ## Sample Workloads & Scripts <a name="scripts"></a>
 
-We have included multiple workload files that capture different behavior:
+We have provided multiple workload files that capture different workload behavior:
 
 * *Static* - The keys in the hash table and their popularity are static.
 * *Popularity Churn* - There is churn in the set of most popular keys at different rates (medium & high)
 * *Steady State* - Insert and delete operations are equal, and the number of keys remains approximately steady
 * *Read Mostly* - Small percentage of insert operations are issued, causing the number of keys to grow over time.
 
-To run all the workloads,
+Overall, a total of six workloads for each hash table implementation have been provided. To run all the workloads,
 
 ```
 $ ./run_all.sh > results.txt
 ```
 
-The full output with fine-grained metrics collected per-batch of 1M opertaions is stored in folder `output/`.
+The full output with fine-grained metrics collected per-batch of 1M operations is stored in folder `output/`.
 
 ## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
 
-By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the architecture family. The steps to follow are:
+By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the processor architecture family. The steps to follow are:
 
 1. To access performance counting registers, enable `rdmpc` instruction at user level:\
 `sudo echo 2 > /sys/devices/cpu/rdpmc`
