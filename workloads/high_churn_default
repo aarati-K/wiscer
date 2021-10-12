@@ -6,6 +6,6 @@ distShiftPrct=50
 fetchProportion=1
 insertProportion=0
 deleteProportion=0
-storageEngine=chained
+storageEngine=ChainedHashing
 keyorder=random
 outputFile=output/high_churn_default

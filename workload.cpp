@@ -18,9 +18,9 @@ Workload::Workload(float zipf,
     this->fetchProportion = fetchProportion;
     this->insertProportion = insertProportion;
     this->deleteProportion = deleteProportion;
-    if (storageEngine.compare("chained")) {
+    if (storageEngine.compare("ChainedHashing")) {
         this->hm = new ChainedHashmap();
-    } else if (storageEngine.compare("chainedAdaptive")) {
+    } else if (storageEngine.compare("VIPHashing")) {
         this->hm = new ChainedAdaptive();
     } else if (storageEngine.compare("none")) {
         this->hm = new StoreWorkload();
@@ -59,9 +59,9 @@ Workload::Workload(string filename) {
         } else if (strcmp(property, "deleteProportion") == 0) {
             this->deleteProportion = stof(val);
         } else if (strcmp(property, "storageEngine") == 0) {
-            if (strcmp(val, "chained") == 0) {
+            if (strcmp(val, "ChainedHashing") == 0) {
                 this->hm = new ChainedHashmap();
-            } else if (strcmp(val, "chainedAdaptive") == 0) {
+            } else if (strcmp(val, "VIPHashing") == 0) {
                 this->hm = new ChainedAdaptive();
             } else if (strcmp(val, "none") == 0) {
                 this->hm = new StoreWorkload();

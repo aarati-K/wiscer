@@ -6,6 +6,6 @@ distShiftPrct=50
 fetchProportion=1
 insertProportion=0
 deleteProportion=0
-storageEngine=chainedAdaptive
+storageEngine=VIPHashing
 keyorder=random
 outputFile=output/high_churn_adaptive

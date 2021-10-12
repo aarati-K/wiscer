@@ -6,6 +6,6 @@ distShiftPrct=0
 fetchProportion=0.98
 insertProportion=0.02
 deleteProportion=0
-storageEngine=chained
+storageEngine=ChainedHashing
 keyorder=random
 outputFile=output/read_mostly_default
