@@ -29,6 +29,19 @@ echo "-------------"
 sleep 10
 echo ""
 
+echo "STATIC POPULARITY MEDIUM SKEW"
+make default
+echo "workloads/static_popularity_default_zipf2"
+taskset -c 1 ./benchmark.out workloads/static_popularity_default_zipf2
+echo "-------------"
+sleep 10
+make adaptive
+echo "workloads/static_popularity_adaptive_zipf2"
+taskset -c 1 ./benchmark.out workloads/static_popularity_adaptive_zipf2
+echo "-------------"
+sleep 10
+echo ""
+
 echo "MEDIUM POPULARITY CHURN"
 make default
 echo "workloads/medium_churn_default"

@@ -6,7 +6,6 @@ distShiftPrct=0
 fetchProportion=1
 insertProportion=0
 deleteProportion=0
-updateProportion=0
 storageEngine=chainedAdaptive
 keyorder=random
 outputFile=output/static_popularity_adaptive_zipf2

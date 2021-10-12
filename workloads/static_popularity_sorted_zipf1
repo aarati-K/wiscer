@@ -6,7 +6,6 @@ distShiftPrct=0
 fetchProportion=1
 insertProportion=0
 deleteProportion=0
-updateProportion=0
 storageEngine=chained
 keyorder=sorted
 outputFile=output/static_popularity_sorted_zipf1

@@ -6,7 +6,6 @@ distShiftPrct=0
 fetchProportion=0.98
 insertProportion=0.02
 deleteProportion=0
-updateProportion=0
 storageEngine=chained
 keyorder=random
 outputFile=output/read_mostly_default
