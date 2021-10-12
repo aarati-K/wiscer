@@ -45,7 +45,7 @@ storageEngine=VIPHashing
 
 Stated in words, 500M fetch operations with low skew (`zipf` = 1) are issued to a hash table with 2<sup>20</sup> (= 1048576) keys. The popularity distribution is static (note that `distShiftFreq` > `operationCount`), and the hash table being benchmarked is `VIPHashing`.
 
-*Note on memory requirements* - Wiscer generates the operations to be issued to the hash table all at once, at the start before benchmarking the configured hash table. Thus, the system needs to have sufficient memory to hold the generated workload.
+**Note on memory requirements** - Wiscer generates the operations to be issued to the hash table all at once, at the start before benchmarking the configured hash table. Thus, the system needs to have sufficient memory to hold the generated workload.
 
 ## Scripts
 
@@ -68,20 +68,30 @@ The full output with fine-grained metrics is stored in folder `output/`.
 
 By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the architecture family. The steps to follow are:
 
-1. To access performance counting registers, enable `rdmpc` instruction at user level: `sudo echo 2 > /sys/devices/cpu/rdpmc`.
-2. Install required libraries: `sudo apt install cpuid msr-tools`
-3. Create necessary module files: `sudo modprobe msr`.
-4. Build and install the [msr-tools](https://github.com/intel/msr-tools) repository from Intel (just installing `msr-tools` using `apt` is not sufficient): `./autogen.sh && ./MAKEDEV-cpuid-msr`.
+1. To access performance counting registers, enable `rdmpc` instruction at user level:\
+`sudo echo 2 > /sys/devices/cpu/rdpmc`.
+2. Install required libraries:\
+`sudo apt install cpuid msr-tools`
+3. Create necessary module files:\
+`sudo modprobe msr`.
+4. Build and install the [msr-tools](https://github.com/intel/msr-tools) repository from Intel (just installing `msr-tools` using `apt` is not sufficient):\
+`cd msr-tools && ./autogen.sh && ./MAKEDEV-cpuid-msr`.
 5. For Intel Skylake architecture family, we can program the PMU of core ID `1` as follows:
-    - To enable all PMU units on the core, set register IA32_PERF_GLOBAL_CTRL at 0x38f to 0x70000000f: `wrmsr -p 1 0x38f 0x70000000f`
-    - To enable all fixed counters, set register IA32_FIXED_CTR_CTRL MSR at 0x38d to 0x333: `wrmsr -p 1 0x38d 0x333`
-    - Program register IA32_PERFEVTSEL0 (0x186) to count L3 misses: `wrmsr -p 1 0x186 0x43412e`
-    - Program register IA32_PERFEVTSEL1 (0x187) to count L2 references (L1 misses): `wrmsr -p 1 0x187 0x43ef24`
-    - Program register IA32_PERFEVTSEL2 (0x188) to count L2 misses: `wrmsr -p 1 0x188 0x433f24`
+    - To enable all PMU units on the core, set register IA32_PERF_GLOBAL_CTRL at 0x38f to 0x70000000f:\
+    `wrmsr -p 1 0x38f 0x70000000f`
+    - To enable all fixed counters, set register IA32_FIXED_CTR_CTRL MSR at 0x38d to 0x333:\
+    `wrmsr -p 1 0x38d 0x333`
+    - Program register IA32_PERFEVTSEL0 (0x186) to count L3 misses:\
+    `wrmsr -p 1 0x186 0x43412e`
+    - Program register IA32_PERFEVTSEL1 (0x187) to count L2 references (L1 misses):\
+    `wrmsr -p 1 0x187 0x43ef24`
+    - Program register IA32_PERFEVTSEL2 (0x188) to count L2 misses:\
+    `wrmsr -p 1 0x188 0x433f24`
 6. Enable counting hardware metrics by setting the flag `_COLLECT_METRICS_` in file `metrics.h` to `1`.
-7. Remember to run the code on the programmed core to measure hardware metrics: `taskset -c 1 ./benchmark.out workloads/test`.
+7. Remember to run the code on the programmed core to measure hardware metrics:\
+`taskset -c 1 ./benchmark.out workloads/test`.
 8. Some helpful resources:
-    - Intel Software Forum [1](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/783505)[2](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/595214)
+    - Discussions on Intel Software Forum [(1)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/783505), [(2)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/595214)
     - Intel's Developer manual Volume 3 Chapter 18 details how to program and use the PMU for different Intel architecture families.
 
 ## Good practices
