@@ -2,7 +2,14 @@
 
 Wiscer is a benchmarking tool for systematically generating point query (fetch/insert/delete) workloads, that can capture real-world behavior such as skew in popularity of keys and shifting set of hot keys over time. The workload can be issued to any storage engine that implements the interface specified in `hashmap.h`. Currently, the code is implemented for a Linux-based platform.
 
-## Building & Running Wiscer
+## Table of Contents
+1. [Building & Running Wiscer](#buildnrun)
+2. [Workload Configuration](#workload)
+3. [Scripts](#scripts)
+4. [Measuring Hardware Metrics using the Intel PMU](#pmu)
+5. [Good practices](#goodpractices)
+
+## Building & Running Wiscer <a name="buildnrun"></a>
 
 To build Wiscer, run
 
@@ -13,7 +20,11 @@ Usage: ./benchmark.out workload_file_name (random_seed)
 $ ./benchmark.out workloads/test
 ```
 
-Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference. Currently, the workload configuration options that Wiscer supports are:
+Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
+
+## Workload Configuration <a name="workload"></a>
+
+Currently, the workload configuration options that Wiscer supports are:
 
 * `zipf` - Zipfian factor of the workload (zipf=0.0 corresponds to uniform distribution). Valid values are any positive float.
 * `initialSize` - Initial number of keys in the storage engine (hash table) before running any operations.
@@ -47,7 +58,7 @@ Stated in words, 500M fetch operations with low skew (`zipf` = 1) are issued to 
 
 **Note on memory requirements** - Wiscer generates the operations to be issued to the hash table all at once, at the start before benchmarking the configured hash table. Thus, the system needs to have sufficient memory to hold the generated workload.
 
-## Scripts
+## Scripts <a name="scripts"></a>
 
 We have included multiple workload files that capture different behavior:
 
@@ -64,7 +75,7 @@ $ ./run_all.sh > results.txt
 
 The full output with fine-grained metrics is stored in folder `output/`.
 
-## Measuring Hardware Metrics using the Intel PMU
+## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
 
 By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the architecture family. The steps to follow are:
 
@@ -79,7 +90,7 @@ By default, measuring hardware metrics is disabled. The code for collecting hard
 5. For Intel Skylake architecture family, we can program the PMU of core ID `1` as follows:
     - To enable all PMU units on the core, set register IA32_PERF_GLOBAL_CTRL at 0x38f to 0x70000000f:\
     `wrmsr -p 1 0x38f 0x70000000f`
-    - To enable all fixed counters, set register IA32_FIXED_CTR_CTRL MSR at 0x38d to 0x333:\
+    - To enable all fixed counters (reference cycles, actual cycles, retired instructions, etc.), set register IA32_FIXED_CTR_CTRL MSR at 0x38d to 0x333:\
     `wrmsr -p 1 0x38d 0x333`
     - Program register IA32_PERFEVTSEL0 (0x186) to count L3 misses:\
     `wrmsr -p 1 0x186 0x43412e`
@@ -95,10 +106,10 @@ By default, measuring hardware metrics is disabled. The code for collecting hard
     - Discussions on Intel Software Forum [(1)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/783505) [(2)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/595214)
     - [Intel's Developer Manual Volume 3](https://www.intel.com/content/www/us/en/architecture-and-technology/64-ia-32-architectures-software-developer-system-programming-manual-325384.html) Chapter 18 details how to program and use the PMU for different Intel architecture families.
 
-## Good practices
+## Good practices <a name="goodpractices"></a>
 
-* **Dedicated server machine for benchmarking** - This avoids interference from concurrent processes.
-* **Pin process to a core** - By pinning the process to a core, we can avoid the overhead of task switching if the chosen core is free. In our script `run.sh`, we pin the process to core `1` (avoid choosing core `0`).
-* **Disable frequency scaling** - Frequency scaling can be disabled by setting the scaling governor to `performance`:\
+* *Dedicated server machine for benchmarking* - This avoids interference from concurrent processes.
+* *Pin process to a core* - By pinning the process to a core, we can avoid the overhead of task switching if the chosen core is free. In our script `run.sh`, we pin the process to core `1` (avoid choosing core `0`).
+* *Disable frequency scaling* - Set the scaling governor of the chosen core to `performance`:\
 `sudo echo performance > /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor`\
-This mitigates variablity due to changing processor frequency.
+This mitigates variablity in performance due to changing processor frequency.
