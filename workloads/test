@@ -8,4 +8,3 @@ insertProportion=0
 deleteProportion=0
 updateProportion=0
 storageEngine=chainedAdaptive
-outputFile=output/test
