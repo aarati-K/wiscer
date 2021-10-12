@@ -3,10 +3,10 @@
 Wiscer is a benchmarking tool for systematically generating point query (fetch/insert/delete) workloads, that can capture real-world behavior such as skew in popularity of keys and shifting set of hot keys over time. The workload can be issued to any storage engine that implements the interface specified in `hashmap.h`. Currently, the code is implemented for a Linux-based platform.
 
 ## Table of Contents
-1. [Building & Running Wiscer](#buildnrun)
-2. [Configuring Workloads](#workload)
-3. [Scripts](#scripts)
-4. [Measuring Hardware Metrics using the Intel PMU](#pmu)
+1. [Building & running Wiscer](#buildnrun)
+2. [Configuring workloads](#workload)
+3. [Sample workloads & scripts](#scripts)
+4. [Measuring hardware metrics using the Intel PMU](#pmu)
 5. [Good practices](#goodpractices)
 
 ## Building & Running Wiscer <a name="buildnrun"></a>
@@ -58,7 +58,7 @@ Stated in words, 500M fetch operations with low skew (`zipf` = 1) are issued to 
 
 **Note on memory requirements** - Wiscer generates the operations to be issued to the hash table all at once, at the start before benchmarking the configured hash table. Thus, the system needs to have sufficient memory to hold the generated workload.
 
-## Scripts <a name="scripts"></a>
+## Sample Workloads & Scripts <a name="scripts"></a>
 
 We have included multiple workload files that capture different behavior:
 
