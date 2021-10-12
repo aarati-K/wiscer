@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
     } else {
         w->setRandomSeed(0);
     }
-    w->printParams();
     w->run();
     return 0;
 }

@@ -106,6 +106,10 @@ void Workload::run() {
 
     // Run
     HashmapReq *reqs = (HashmapReq*)malloc(sizeof(HashmapReq)*this->operationCount);
+    if (!reqs) {
+        cout << "Malloc failed while initializing workload, insufficient memory" << endl;
+        exit(1);
+    }
     memset(reqs, 0, sizeof(HashmapReq)*this->operationCount);
     ulong numBatches = this->operationCount/this->batchSize;
     if (this->operationCount % this->batchSize > 0) {
@@ -163,6 +167,7 @@ void Workload::run() {
         hm->rehash(); // Do rehashing if necessary
     }
     cout << "Total time (us): " << totalTime << endl;
+    cout << "Net throughput: " << this->operationCount/float(totalTime) << "M ops/s" << endl; 
     storeOutput();
     std::free(reqs);
     this->free();
