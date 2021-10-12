@@ -64,18 +64,18 @@ $ ./run_all.sh > results.txt
 
 The full output with fine-grained metrics is stored in folder `output/`.
 
-## Measuring Hardware Metrics using the PMU
+## Measuring Hardware Metrics using the Intel PMU
 
 By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the architecture family. The steps to follow are:
 
 1. To access performance counting registers, enable `rdmpc` instruction at user level:\
-`sudo echo 2 > /sys/devices/cpu/rdpmc`.
+`sudo echo 2 > /sys/devices/cpu/rdpmc`
 2. Install required libraries:\
 `sudo apt install cpuid msr-tools`
 3. Create necessary module files:\
-`sudo modprobe msr`.
+`sudo modprobe msr`
 4. Build and install the [msr-tools](https://github.com/intel/msr-tools) repository from Intel (just installing `msr-tools` using `apt` is not sufficient):\
-`cd msr-tools && ./autogen.sh && ./MAKEDEV-cpuid-msr`.
+`cd msr-tools && ./autogen.sh && ./MAKEDEV-cpuid-msr`
 5. For Intel Skylake architecture family, we can program the PMU of core ID `1` as follows:
     - To enable all PMU units on the core, set register IA32_PERF_GLOBAL_CTRL at 0x38f to 0x70000000f:\
     `wrmsr -p 1 0x38f 0x70000000f`
@@ -87,11 +87,18 @@ By default, measuring hardware metrics is disabled. The code for collecting hard
     `wrmsr -p 1 0x187 0x43ef24`
     - Program register IA32_PERFEVTSEL2 (0x188) to count L2 misses:\
     `wrmsr -p 1 0x188 0x433f24`
-6. Enable counting hardware metrics by setting the flag `_COLLECT_METRICS_` in file `metrics.h` to `1`.
+6. Enable counting hardware metrics by setting the flag `_COLLECT_METRICS_` in file `metrics.h` to `1`:\
+`#define _COLLECT_METRICS_ 1`
 7. Remember to run the code on the programmed core to measure hardware metrics:\
-`taskset -c 1 ./benchmark.out workloads/test`.
+`taskset -c 1 ./benchmark.out workloads/test`
 8. Some helpful resources:
-    - Discussions on Intel Software Forum [(1)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/783505), [(2)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/595214)
-    - Intel's Developer manual Volume 3 Chapter 18 details how to program and use the PMU for different Intel architecture families.
+    - Discussions on Intel Software Forum [(1)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/783505) [(2)](https://software.intel.com/en-us/forums/software-tuning-performance-optimization-platform-monitoring/topic/595214)
+    - [Intel's Developer Manual Volume 3](https://www.intel.com/content/www/us/en/architecture-and-technology/64-ia-32-architectures-software-developer-system-programming-manual-325384.html) Chapter 18 details how to program and use the PMU for different Intel architecture families.
 
 ## Good practices
+
+* **Dedicated server machine for benchmarking** - This avoids interference from concurrent processes.
+* **Pin process to a core** - By pinning the process to a core, we can avoid the overhead of task switching if the chosen core is free. In our script `run.sh`, we pin the process to core `1` (avoid choosing core `0`).
+* **Disable frequency scaling** - Frequency scaling can be disabled by setting the scaling governor to `performance`:\
+`sudo echo performance > /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor`\
+This mitigates variablity due to changing processor frequency.
