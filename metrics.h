@@ -9,6 +9,7 @@ using namespace std;
 
 // Change this to 1 to collect metrics
 #define _COLLECT_METRICS_ 0
+#define _COUNT_DISP_ 1
 
 typedef struct Metrics {
     struct timespec startTime;

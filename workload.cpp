@@ -216,6 +216,12 @@ void Workload::storeOutput() {
     if (this->operationCount % this->batchSize > 0) {
         numBatches += 1;
     }
+    output << "Throughput" << " "
+        << "Retd. Instructions" << " "
+        << "L3 Misses" << " "
+        << "L2 Misses" << " "
+        << "L1 Misses" << " "
+        << "Displacement" << endl;
     for (ulong i=0; i<numBatches; i++) {
         output << throughput[i] << " " 
             << retdInsts[i] << " "

@@ -253,13 +253,13 @@ inline void ChainedAdaptive::_fetchDefault(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
-#if _COLLECT_METRICS_
+#if _COUNT_DISP_
         displacementMetric += 1;
 #endif
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
-#if _COLLECT_METRICS_
+#if _COUNT_DISP_
     displacementMetric += 1;
 #endif
     r->value = ptr->value;
@@ -271,14 +271,14 @@ inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
     KV* ptr = dict[h];
     ulong disp = 0;
     while (ptr && ptr->key != r->key) {
-#if _COLLECT_METRICS_
+#if _COUNT_DISP_
         displacementMetric += 1;
 #endif
         disp += 1;
         ptr = ptr->next;
     }
     if (ptr == NULL) return;
-#if _COLLECT_METRICS_
+#if _COUNT_DISP_
     displacementMetric += 1;
 #endif
     r->value = ptr->value;
@@ -310,7 +310,7 @@ inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
             min_access_ptr = aptr;
             min_access_entry = ptr;
         }
-#if _COLLECT_METRICS_
+#if _COUNT_DISP_
         displacementMetric += 1;
 #endif
         ptr = ptr->next;
@@ -325,7 +325,7 @@ inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
         aptr = &accesses[accessesOffset];
         accessesOffset += 1;
     }
-#if _COLLECT_METRICS_
+#if _COUNT_DISP_
     displacementMetric += 1;
 #endif
     r->value = ptr->value;
