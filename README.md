@@ -4,7 +4,7 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 
 ## Table of Contents
 1. [Building & Running Wiscer](#buildnrun)
-2. [Workload Configuration](#workload)
+2. [Configuring Workloads](#workload)
 3. [Scripts](#scripts)
 4. [Measuring Hardware Metrics using the Intel PMU](#pmu)
 5. [Good practices](#goodpractices)
@@ -22,7 +22,7 @@ $ ./benchmark.out workloads/test
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
 
-## Workload Configuration <a name="workload"></a>
+## Configuring Workloads <a name="workload"></a>
 
 Currently, the workload configuration options that Wiscer supports are:
 
