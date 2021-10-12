@@ -73,7 +73,7 @@ To run all the workloads,
 $ ./run_all.sh > results.txt
 ```
 
-The full output with fine-grained metrics is stored in folder `output/`.
+The full output with fine-grained metrics collected per-batch of 1M opertaions is stored in folder `output/`.
 
 ## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
 
