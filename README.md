@@ -4,7 +4,7 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 
 ## Table of Contents
 1. [Building & running Wiscer](#buildnrun)
-2. [Generating workloads](#workload)
+2. [Configuring workloads](#workload)
 3. [Sample workloads & scripts](#scripts)
 4. [Measuring hardware metrics using the Intel PMU](#pmu)
 5. [Good practices](#goodpractices)
@@ -22,7 +22,7 @@ $ ./benchmark.out workloads/test
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
 
-## Generating Workloads <a name="workload"></a>
+## Configuring Workloads <a name="workload"></a>
 
 Currently, the workload configuration options that Wiscer supports are:
 
@@ -74,9 +74,41 @@ $ ./run_all.sh > results.txt
 
 The full output with fine-grained metrics collected per-batch of 1M operations is stored in folder `output/`.
 
+To parse the results obtained, run
+
+```
+$ sudo apt install python-tabulate
+```
+or
+```
+$ pip install tabulate
+```
+
+Then, run
+```
+$ python2 parse_results.py
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| Workload                               |   Chained Hashing (Mops/s) |   VIP Hashing (Mops/s) | Gain VIP vs Chained hashing   |
++========================================+============================+========================+===============================+
+| STATIC POPULARITY UNIFORM DISTRIBUTION |                    20.8877 |                21.7213 | 4.0%                          |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| STATIC POPULARITY LOW SKEW             |                    30.7928 |                38.4838 | 25.0%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| STATIC POPULARITY MEDIUM SKEW          |                   119.648  |               257.665  | 115.4%                        |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| MEDIUM POPULARITY CHURN                |                    30.5335 |                37.908  | 24.2%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| HIGH POPULARITY CHURN                  |                    30.7855 |                35.5194 | 15.4%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| STEADY STATE                           |                    27.4044 |                30.3161 | 10.6%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| READ MOSTLY                            |                    21.9074 |                23.2989 | 6.4%                          |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+```
+
 ## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
 
-By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the processor architecture family. The steps to follow are:
+By default, measuring hardware metrics is disabled. The code for collecting hardware metrics is specific to Intel CPUs, and the performance monitoring unit (PMU) registers need to be programmed according to the processor's architecture family. The steps to follow are:
 
 1. To access performance counting registers, enable `rdmpc` instruction at user level:\
 `sudo echo 2 > /sys/devices/cpu/rdpmc`

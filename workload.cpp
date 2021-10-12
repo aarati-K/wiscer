@@ -175,7 +175,7 @@ void Workload::run() {
         hm->rehash(); // Do rehashing if necessary
     }
     cout << "Total time (us): " << totalTime << endl;
-    cout << "Net throughput: " << this->operationCount/float(totalTime) << "M ops/s" << endl; 
+    cout << "Net throughput: " << this->operationCount/float(totalTime) << " Mops/s" << endl;
     storeOutput();
     std::free(reqs);
     this->free();
