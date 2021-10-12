@@ -69,6 +69,14 @@ Workload::Workload(string filename) {
                 // Default
                 this->hm = new ChainedHashmap();
             }
+        } else if (strcmp(property, "keyPattern") == 0) {
+            if (strcmp(val, "random") == 0) {
+                this->keyPattern = RANDOM;
+            } else if (strcmp(val, "sequential") == 0) {
+                this->keyPattern = SEQUENTIAL;
+            } else {
+                this->keyPattern = RANDOM;
+            }
         } else if (strcmp(property, "keyorder") == 0) {
             if (strcmp(val, "random") == 0) {
                 this->keyorder = RANDOM;
@@ -188,15 +196,28 @@ inline void Workload::initHashmap() {
     memset(cumProb, 0, sizeof(double)*finalSize);
     memset(popOrder, 0, sizeof(ulong)*finalSize);
 
-    popOrder[0] = this->_multAddHash(0);
-    cumProb[0] = 1/pow(1, this->zipf);
-    cumsum = cumProb[0];
-    for (ulong i=1; i<initialSize; i++) {
-        /* Mult Add hash function, for generating random ulong numbers */
-        popOrder[i] = this->_multAddHash(i);
-        cumProb[i] = 1/pow(i+1, this->zipf);
-        cumsum += cumProb[i];
-        cumProb[i] += cumProb[i-1];
+    if (this->keyPattern == RANDOM) {
+        popOrder[0] = this->_multAddHash(0);
+        cumProb[0] = 1/pow(1, this->zipf);
+        cumsum = cumProb[0];
+        for (ulong i=1; i<initialSize; i++) {
+            /* Mult Add hash function, for generating random ulong numbers */
+            popOrder[i] = this->_multAddHash(i);
+            cumProb[i] = 1/pow(i+1, this->zipf);
+            cumsum += cumProb[i];
+            cumProb[i] += cumProb[i-1];
+        }
+    } else { // SEQUENTIAL
+        popOrder[0] = 0;
+        cumProb[0] = 1/pow(1, this->zipf);
+        cumsum = cumProb[0];
+        for (ulong i=1; i<initialSize; i++) {
+            popOrder[i] = i;
+            cumProb[i] = 1/pow(i+1, this->zipf);
+            cumsum += cumProb[i];
+            cumProb[i] += cumProb[i-1];
+        }
+        this->_random_shuffle(popOrder, initialSize);
     }
 
     hm->bulkLoad(popOrder, initialSize);
@@ -216,11 +237,11 @@ void Workload::storeOutput() {
     if (this->operationCount % this->batchSize > 0) {
         numBatches += 1;
     }
-    output << "Throughput" << " "
-        << "Retd. Instructions" << " "
-        << "L3 Misses" << " "
-        << "L2 Misses" << " "
-        << "L1 Misses" << " "
+    output << "Throughput | "
+        << "Retd. Instructions | "
+        << "L3 Misses | "
+        << "L2 Misses | "
+        << "L1 Misses | "
         << "Displacement" << endl;
     for (ulong i=0; i<numBatches; i++) {
         output << throughput[i] << " " 

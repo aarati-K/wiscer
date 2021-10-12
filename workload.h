@@ -20,6 +20,10 @@ using namespace std;
 #define RANDOM  0
 #define SORTED  1
 
+// Key patterns
+// #define RANDOM 0
+#define SEQUENTIAL 1
+
 class Workload {
 private:
     // Params
@@ -31,6 +35,7 @@ private:
     float fetchProportion = 1;
     float insertProportion = 0;
     float deleteProportion = 0;
+    int keyPattern = RANDOM;
     int keyorder = RANDOM;
     string outputFile = "output.txt";
 
