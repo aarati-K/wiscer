@@ -6,6 +6,8 @@ using namespace std;
 #ifndef _STORE_WORKLOAD_H_
 #define _STORE_WORKLOAD_H_
 
+#define _SORT_KEYS_ 0
+
 class StoreWorkload : public Hashmap {
 private:
     ofstream keys_file;

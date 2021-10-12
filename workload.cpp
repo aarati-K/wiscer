@@ -217,6 +217,7 @@ inline void Workload::initHashmap() {
             cumsum += cumProb[i];
             cumProb[i] += cumProb[i-1];
         }
+        // The popularity order of keys is arbitrary
         this->_random_shuffle(popOrder, initialSize);
     }
 

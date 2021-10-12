@@ -5,7 +5,7 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 ## Table of Contents
 1. [Building & running Wiscer](#buildnrun)
 2. [Generating workloads](#workload)
-3. [Sample workloads & Scripts](#scripts)
+3. [Sample workloads & scripts](#scripts)
 4. [Measuring hardware metrics using the Intel PMU](#pmu)
 5. [Good practices](#goodpractices)
 

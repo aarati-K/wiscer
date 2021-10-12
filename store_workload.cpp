@@ -1,27 +1,55 @@
 #include "store_workload.h"
 
 StoreWorkload::StoreWorkload() {
-    keys_file.open("keys_uint64", ios::out | ios::binary);
-    ops_file.open("ops", ios::out | ios::binary);
+    keys_file.open("keys.txt", ios::out | ios::binary);
+    ops_file.open("ops.txt", ios::out | ios::binary);
 }
 
 void StoreWorkload::initHashpower(int hashpower) {}
 
+/*
+ * Store keys to a binary file with 64-bit unsigned long integers.
+ * First is the total number of keys, followed by the keys.
+*/
 void StoreWorkload::bulkLoad(ulong *keys, ulong num_keys) {
+#if _SORT_KEYS_
     Metrics m;
     clock_gettime(CLOCK_MONOTONIC, &(m.startTime));
     _heapSort(keys, num_keys);
     clock_gettime(CLOCK_MONOTONIC, &(m.endTime));
     cout << "Sort time (us): " << getTimeDiff(m.startTime, m.endTime) << endl;
+#endif
     keys_file.write((char*)&num_keys, sizeof(ulong));
     for (ulong i=0; i<num_keys; i++) {
         keys_file.write((char*)&keys[i], sizeof(ulong));
     }
 }
 
+/*
+ * Store ops to a binary file.
+ * Format is opcode (char) followed by the unsigned long 64-bit key.
+ */
 Metrics StoreWorkload::processRequests(HashmapReq *reqs, ulong num_reqs) {
-    // TODO: Store workload to ops file
     Metrics m;
+    clock_gettime(CLOCK_MONOTONIC, &(m.startTime));
+    for (ulong i=0; i<num_reqs; i++) {
+        switch (reqs[i].reqType) {
+            case FETCH_REQ:
+                ops_file.write((char*)&fetchOpcode, sizeof(char));
+                break;
+            case INSERT_REQ:
+                ops_file.write((char*)&insertOpcode, sizeof(char));
+                break;
+            case DELETE_REQ:
+                ops_file.write((char*)&deleteOpcode, sizeof(char));
+                break;
+            default:
+                break;
+        }
+        ops_file.write((char*)&reqs[i].key, sizeof(ulong));
+    }
+    clock_gettime(CLOCK_MONOTONIC, &(m.endTime));
+    m.timeElapsedus = getTimeDiff(m.startTime, m.endTime);
     return m;
 }
 
