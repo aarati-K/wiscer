@@ -118,8 +118,8 @@ By default, measuring hardware metrics is disabled. The code for collecting hard
 `sudo modprobe msr`
 4. Build and install the [msr-tools](https://github.com/intel/msr-tools) repository from Intel (just installing `msr-tools` using `apt` is not sufficient):\
 ```
-git clone https://github.com/intel/msr-tools.git
-cd msr-tools && ./autogen.sh && ./MAKEDEV-cpuid-msr
+$ git clone https://github.com/intel/msr-tools.git
+$ cd msr-tools && ./autogen.sh && ./MAKEDEV-cpuid-msr
 ```
 5. For Intel Skylake architecture family, we can program the PMU of core ID `1` as follows:
     - To enable all PMU units on the core, set register IA32_PERF_GLOBAL_CTRL at 0x38f to 0x70000000f:\
