@@ -4,6 +4,7 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 
 ## Table of Contents
 1. [Building & running Wiscer](#buildnrun)
+    - [System Requirements](#sysreq)
 2. [Configuring workloads](#workload)
 3. [Sample workloads & scripts](#scripts)
 4. [Measuring hardware metrics using the Intel PMU](#pmu)
@@ -22,7 +23,12 @@ $ ./benchmark.out workloads/test
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
 
-**Note**: Intel Intrinsics libraries might not be available for some platforms, in which case the flag `_INTEL_INTRINSICS_` in file `chained_adaptive.h` should be disabled.
+### Note on System Requirements <a name="sysreq"></a>
+
+1. *Intel Intrinsics* - Intel Intrinsics libraries might not be available for some platforms, in which case the flag `_INTEL_INTRINSICS_` in file `chained_adaptive.h` should be disabled.\
+`#define _INTEL_INTRINSICS_ 0`
+
+2. *Memory Requirements* - Wiscer generates the operations to be issued to the hash table all at once, at the start before benchmarking the configured hash table. Thus, the system needs to have sufficient memory to hold the generated workload.
 
 ## Configuring Workloads <a name="workload"></a>
 
@@ -57,8 +63,6 @@ storageEngine=VIPHashing
 
 Stated in words, 500M fetch operations with low skew (`zipf` = 1) are issued to a hash table with 2<sup>20</sup> (= 1048576) keys. The popularity distribution is static (note that `distShiftFreq` > `operationCount`), and the hash table being benchmarked is `VIPHashing`.
 
-**Note on memory requirements** - Wiscer generates the operations to be issued to the hash table all at once, at the start before benchmarking the configured hash table. Thus, the system needs to have sufficient memory to hold the generated workload.
-
 ## Sample Workloads & Scripts <a name="scripts"></a>
 
 We have provided multiple workload files that capture different workload behavior:
@@ -89,24 +93,6 @@ $ pip install tabulate
 Then, run
 ```
 $ python2 parse_results.py
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| Workload                               |   Chained Hashing (Mops/s) |   VIP Hashing (Mops/s) | Gain VIP vs Chained hashing   |
-+========================================+============================+========================+===============================+
-| STATIC POPULARITY UNIFORM DISTRIBUTION |                    20.8877 |                21.7213 | 4.0%                          |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| STATIC POPULARITY LOW SKEW             |                    30.7928 |                38.4838 | 25.0%                         |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| STATIC POPULARITY MEDIUM SKEW          |                   119.648  |               257.665  | 115.4%                        |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| MEDIUM POPULARITY CHURN                |                    30.5335 |                37.908  | 24.2%                         |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| HIGH POPULARITY CHURN                  |                    30.7855 |                35.5194 | 15.4%                         |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| STEADY STATE                           |                    27.4044 |                30.3161 | 10.6%                         |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-| READ MOSTLY                            |                    21.9074 |                23.2989 | 6.4%                          |
-+----------------------------------------+----------------------------+------------------------+-------------------------------+
-```
 
 ## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
 
