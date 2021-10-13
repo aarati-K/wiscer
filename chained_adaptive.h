@@ -39,7 +39,7 @@ private:
 
     // Algorithm configuration
     int periodicity = 60;
-    int epoch_size_factor = 1.5;
+    float epoch_size_factor = 1.5;
     double confidence_prct = 0.95;
     int sample_size = 1000;
     ulong displacement = 0;

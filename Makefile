@@ -1,4 +1,4 @@
-CC=g++ -O3
+CC=clang++ -O3
 
 all: main.o workload.o metrics.o chained.o chained_adaptive.o store_workload.o
 	$(CC) -o benchmark.out main.o workload.o metrics.o chained.o chained_adaptive.o store_workload.o
