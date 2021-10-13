@@ -4,7 +4,7 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 
 ## Table of Contents
 1. [Building & running Wiscer](#buildnrun)
-    - [System Requirements](#sysreq)
+    * [System Requirements](#sysreq)
 2. [Configuring workloads](#workload)
 3. [Sample workloads & scripts](#scripts)
 4. [Measuring hardware metrics using the Intel PMU](#pmu)
@@ -23,7 +23,7 @@ $ ./benchmark.out workloads/test
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
 
-### Note on System Requirements <a name="sysreq"></a>
+#### System Requirements <a name="sysreq"></a>
 
 1. *Intel Intrinsics* - Intel Intrinsics libraries might not be available for some platforms, in which case the flag `_INTEL_INTRINSICS_` in file `chained_adaptive.h` should be disabled.\
 `#define _INTEL_INTRINSICS_ 0`
@@ -93,6 +93,7 @@ $ pip install tabulate
 Then, run
 ```
 $ python2 parse_results.py
+```
 
 ## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
 
