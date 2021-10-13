@@ -1,13 +1,13 @@
 CC=g++ -O3
 
 all: main.o workload.o metrics.o chained.o chained_adaptive.o store_workload.o
-	$(CC) -o benchmark.out main.o workload.o metrics.o chained_adaptive.o chained.o store_workload.o
+	$(CC) -o benchmark.out main.o workload.o metrics.o chained.o chained_adaptive.o store_workload.o
 
 default: main.o workload.o metrics.o chained.o chained_adaptive_dummy.o store_workload_dummy.o
-	$(CC) -o benchmark.out main.o workload.o metrics.o chained.o chained_adaptive_dummy.o store_workload_dummy.o
+	$(CC) -o benchmark.out chained.o main.o workload.o metrics.o chained_adaptive_dummy.o store_workload_dummy.o
 
 adaptive: main.o workload.o metrics.o chained_dummy.o chained_adaptive.o store_workload_dummy.o
-	$(CC) -o benchmark.out main.o workload.o metrics.o chained_adaptive.o chained_dummy.o store_workload_dummy.o
+	$(CC) -o benchmark.out chained_adaptive.o main.o workload.o metrics.o chained_dummy.o store_workload_dummy.o
 
 store: main.o workload.o metrics.o chained_dummy.o chained_adaptive_dummy.o store_workload.o
 	$(CC) -o benchmark.out main.o workload.o metrics.o chained_dummy.o chained_adaptive_dummy.o store_workload.o
