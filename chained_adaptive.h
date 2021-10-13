@@ -1,6 +1,11 @@
 #include "hashmap.h"
 #include "chained.h"
+
+#define _INTEL_INTRINSICS_ 1
+
+#if _INTEL_INTRINSICS_
 #include "x86intrin.h"
+#endif
 
 using namespace std;
 

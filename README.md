@@ -22,6 +22,8 @@ $ ./benchmark.out workloads/test
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
 
+**Note**: Intel Intrinsics libraries might not be available for some platforms, in which case the flag `_INTEL_INTRINSICS_` in file `chained_adaptive.h` should be disabled.
+
 ## Configuring Workloads <a name="workload"></a>
 
 Currently, the workload configuration options that Wiscer supports are:

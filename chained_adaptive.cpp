@@ -468,6 +468,7 @@ inline void ChainedAdaptive::_resetAccesses() {
 }
 
 inline void ChainedAdaptive::_clearCache() {
+#if _INTEL_INTRINSICS_
     void *ptr = this->accesses;
     ulong sz = sizeof(Acc)*(accessesOffset);
     ulong n = sz/64; // cache-line size
@@ -481,4 +482,7 @@ inline void ChainedAdaptive::_clearCache() {
     for (ulong i=0; i<n; i++) {
         _mm_clflushopt((char*)ptr + 64*i);
     }
+#else
+    return;
+#endif
 }
