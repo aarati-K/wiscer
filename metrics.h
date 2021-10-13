@@ -2,8 +2,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-using namespace std;
-
 #ifndef _METRICS_H_
 #define _METRICS_H_
 
