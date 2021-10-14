@@ -9,8 +9,6 @@
 #include <fstream>
 #include <cmath>
 #include "hashmap.h"
-#include "chained.h"
-#include "chained_adaptive.h"
 #include "metrics.h"
 #include "store_workload.h"
 

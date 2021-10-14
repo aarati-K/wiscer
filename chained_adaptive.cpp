@@ -1,6 +1,6 @@
 #include "chained_adaptive.h"
 
-ChainedAdaptive::ChainedAdaptive() {
+Hashmap::Hashmap() {
     this->hashpower = -1; // not initialized
     this->hmsize = 0;
     this->cardinality = 0;
@@ -15,7 +15,7 @@ ChainedAdaptive::ChainedAdaptive() {
     this->mode = ADAPTIVE;
 }
 
-void ChainedAdaptive::initHashpower(int hashpower) {
+void Hashmap::initHashpower(int hashpower) {
     this->hashpower = hashpower;
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
@@ -36,14 +36,14 @@ void ChainedAdaptive::initHashpower(int hashpower) {
     statReqCount = 0;
 }
 
-void ChainedAdaptive::bulkLoad(ulong *keys, ulong num_keys) {
+void Hashmap::bulkLoad(ulong *keys, ulong num_keys) {
     for (ulong i=0; i<num_keys; i++) {
         _setFinal(keys[i], _random());
     }
     this->cardinality = num_keys;
 }
 
-Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
+Metrics Hashmap::processRequests(HashmapReq *reqs, ulong count) {
     Metrics m;
     m.displacement = displacementMetric;
     getMetricsStart(m);
@@ -187,7 +187,7 @@ Metrics ChainedAdaptive::processRequests(HashmapReq *reqs, ulong count) {
     return m;
 }
 
-void ChainedAdaptive::rehash() {
+void Hashmap::rehash() {
     if (cardinality < 1.5*hmsize && cardinality > 0.5*hmsize) {
         return;
     }
@@ -225,21 +225,21 @@ void ChainedAdaptive::rehash() {
     std::free(old_accesses);
 }
 
-void ChainedAdaptive::free() {
+void Hashmap::free() {
     std::free(dict);
     std::free(entries);
     std::free(accessesDict);
     std::free(accesses);
 }
 
-inline ulong ChainedAdaptive::_random() {
+inline ulong Hashmap::_random() {
     ulong r = (ulong)random();
     r = r<<31;
     r = r + (ulong)random();
     return r;
 }
 
-inline ulong ChainedAdaptive::_murmurHash(ulong h) {
+inline ulong Hashmap::_murmurHash(ulong h) {
     h ^= h >> 33;
     h *= 0xff51afd7ed558ccd;
     h ^= h >> 33;
@@ -249,7 +249,7 @@ inline ulong ChainedAdaptive::_murmurHash(ulong h) {
     return h;
 }
 
-inline void ChainedAdaptive::_fetchDefault(HashmapReq *r) {
+inline void Hashmap::_fetchDefault(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
@@ -266,7 +266,7 @@ inline void ChainedAdaptive::_fetchDefault(HashmapReq *r) {
     numReqs += 1;
 }
 
-inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
+inline void Hashmap::_fetchBenchmark(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     ulong disp = 0;
@@ -288,7 +288,7 @@ inline void ChainedAdaptive::_fetchBenchmark(HashmapReq *r) {
     statReqCount += 1;
 }
 
-inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
+inline void Hashmap::_fetchAdaptive(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     KV* min_access_entry = ptr;
@@ -353,7 +353,7 @@ inline void ChainedAdaptive::_fetchAdaptive(HashmapReq *r) {
     }
 }
 
-inline void ChainedAdaptive::_insert(HashmapReq *r) {
+inline void Hashmap::_insert(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
@@ -369,7 +369,7 @@ inline void ChainedAdaptive::_insert(HashmapReq *r) {
     numReqs += 1;
 }
 
-inline void ChainedAdaptive::_delete(HashmapReq *r) {
+inline void Hashmap::_delete(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV *prev, *cur;
     cur = prev = dict[h];
@@ -408,7 +408,7 @@ inline void ChainedAdaptive::_delete(HashmapReq *r) {
     }
 }
 
-inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
+inline void Hashmap::_setFinal(ulong key, ulong value) {
     entries[entriesOffset].key = key;
     entries[entriesOffset].value = value;
     ulong h = _murmurHash(key);
@@ -425,7 +425,7 @@ inline void ChainedAdaptive::_setFinal(ulong key, ulong value) {
 // Used only while rehashing, don't use elsewhere
 // Inserts at the end of the chain, not at the start
 // Only while rehashing we eagerly mirror accessesDict to follow the structure of dict
-inline void ChainedAdaptive::_setFinalEnd(ulong key, ulong value) {
+inline void Hashmap::_setFinalEnd(ulong key, ulong value) {
     entries[entriesOffset].key = key;
     entries[entriesOffset].value = value;
     ulong h = _murmurHash(key);
@@ -448,12 +448,12 @@ inline void ChainedAdaptive::_setFinalEnd(ulong key, ulong value) {
     accessesOffset += 1;
 }
 
-inline ulong ChainedAdaptive::_getTimeDiff(struct timespec startTime, struct timespec endTime) {
+inline ulong Hashmap::_getTimeDiff(struct timespec startTime, struct timespec endTime) {
     return (ulong)((endTime.tv_sec - startTime.tv_sec)*1000000 +
         double(endTime.tv_nsec - startTime.tv_nsec)/1000);
 }
 
-inline int ChainedAdaptive::_getHashpower() {
+inline int Hashmap::_getHashpower() {
     int hashpower = 0;
     while (pow(2, hashpower) < this->cardinality/1.5) {
         hashpower += 1;
@@ -461,13 +461,13 @@ inline int ChainedAdaptive::_getHashpower() {
     return hashpower;
 }
 
-inline void ChainedAdaptive::_resetAccesses() {
+inline void Hashmap::_resetAccesses() {
     memset(this->accesses, 0, sizeof(Acc)*(accessesOffset));
     memset(this->accessesDict, 0, sizeof(Acc*)*hmsize);
     accessesOffset = 0;
 }
 
-inline void ChainedAdaptive::_clearCache() {
+inline void Hashmap::_clearCache() {
 #if _INTEL_INTRINSICS_
     void *ptr = this->accesses;
     ulong sz = sizeof(Acc)*(accessesOffset);

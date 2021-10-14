@@ -1,5 +1,13 @@
-#include "hashmap.h"
-#include "chained.h"
+#include <cstdio>
+#include <cstdlib>
+#include <stdlib.h>
+#include <time.h>
+#include <iostream>
+#include <cmath>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include "metrics.h"
 
 #define _INTEL_INTRINSICS_ 1
 
@@ -12,10 +20,26 @@ using namespace std;
 #ifndef _CHAINED_ADAPTIVE_H_
 #define _CHAINED_ADAPTIVE_H_
 
+#define FETCH_REQ 0
+#define INSERT_REQ 1
+#define DELETE_REQ 2
+
 #define ADAPTIVE 0
 #define BENCHMARKING 1
 #define DEFAULT 2
 #define SENSING 3
+
+typedef struct HashmapReq {
+    ulong key;
+    ulong value;
+    uint8_t reqType;
+} HashmapReq;
+
+typedef struct KV {
+    ulong key;
+    ulong value;
+    struct KV* next;
+} KV;
 
 typedef struct Acc
 {
@@ -23,8 +47,11 @@ typedef struct Acc
     struct Acc* next;
 } Acc;
 
-class ChainedAdaptive : public Hashmap {
+class Hashmap {
 private:
+    int hashpower;
+    long cardinality;
+    ulong hmsize;
     KV **dict;
     KV *entries;
     Acc **accessesDict;
@@ -53,7 +80,7 @@ private:
     double u1, v1, w1; // estimated when sensing 
 
 public:
-    ChainedAdaptive();
+    Hashmap();
     void initHashpower(int);
     void bulkLoad(ulong*, ulong);
     Metrics processRequests(HashmapReq*, ulong);

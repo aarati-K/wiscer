@@ -1,6 +1,6 @@
 #include "chained.h"
 
-ChainedHashmap::ChainedHashmap() {
+Hashmap::Hashmap() {
     this->hashpower = -1; // not initialized
     this->hmsize = 0;
     this->cardinality = 0;
@@ -9,7 +9,7 @@ ChainedHashmap::ChainedHashmap() {
     this->entriesOffset = 0;
 }
 
-void ChainedHashmap::initHashpower(int hashpower) {
+void Hashmap::initHashpower(int hashpower) {
     this->hashpower = hashpower;
     this->hmsize = pow(2, hashpower);
     this->dict = (KV**)malloc(sizeof(KV*)*hmsize);
@@ -19,14 +19,14 @@ void ChainedHashmap::initHashpower(int hashpower) {
     entriesOffset = 0;
 }
 
-void ChainedHashmap::bulkLoad(ulong *keys, ulong num_keys) {
+void Hashmap::bulkLoad(ulong *keys, ulong num_keys) {
     for (ulong i=0; i<num_keys; i++) {
         _setFinal(keys[i], _random());
     }
     this->cardinality = num_keys;
 }
 
-Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
+Metrics Hashmap::processRequests(HashmapReq *reqs, ulong count) {
     Metrics m;
     m.displacement = displacement;
     getMetricsStart(m);
@@ -50,7 +50,7 @@ Metrics ChainedHashmap::processRequests(HashmapReq *reqs, ulong count) {
     return m;
 }
 
-void ChainedHashmap::rehash() {
+void Hashmap::rehash() {
     if (cardinality < 1.5*hmsize && cardinality > 0.5*hmsize) {
         return;
     }
@@ -78,19 +78,19 @@ void ChainedHashmap::rehash() {
     std::free(old_dict);
 }
 
-void ChainedHashmap::free() {
+void Hashmap::free() {
     std::free(dict);
     std::free(entries);
 }
 
-inline ulong ChainedHashmap::_random() {
+inline ulong Hashmap::_random() {
     ulong r = (ulong)random();
     r = r<<31;
     r = r + (ulong)random();
     return r;
 }
 
-inline ulong ChainedHashmap::_murmurHash(ulong h) {
+inline ulong Hashmap::_murmurHash(ulong h) {
     h ^= h >> 33;
     h *= 0xff51afd7ed558ccd;
     h ^= h >> 33;
@@ -100,7 +100,7 @@ inline ulong ChainedHashmap::_murmurHash(ulong h) {
     return h;
 }
 
-inline void ChainedHashmap::_fetch(HashmapReq *r) {
+inline void Hashmap::_fetch(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
@@ -117,7 +117,7 @@ inline void ChainedHashmap::_fetch(HashmapReq *r) {
     numReqs += 1;
 }
 
-inline void ChainedHashmap::_insert(HashmapReq *r) {
+inline void Hashmap::_insert(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV* ptr = dict[h];
     while (ptr && ptr->key != r->key) {
@@ -133,7 +133,7 @@ inline void ChainedHashmap::_insert(HashmapReq *r) {
     numReqs += 1;
 }
 
-inline void ChainedHashmap::_delete(HashmapReq *r) {
+inline void Hashmap::_delete(HashmapReq *r) {
     ulong h = _murmurHash(r->key);
     KV *prev, *cur;
     cur = prev = dict[h];
@@ -151,7 +151,7 @@ inline void ChainedHashmap::_delete(HashmapReq *r) {
     numReqs += 1;
 }
 
-inline void ChainedHashmap::_setFinal(ulong key, ulong value) {
+inline void Hashmap::_setFinal(ulong key, ulong value) {
     entries[entriesOffset].key = key;
     entries[entriesOffset].value = value;
     ulong h = _murmurHash(key);
@@ -160,12 +160,12 @@ inline void ChainedHashmap::_setFinal(ulong key, ulong value) {
     entriesOffset += 1;
 }
 
-inline ulong ChainedHashmap::_getTimeDiff(struct timespec startTime, struct timespec endTime) {
+inline ulong Hashmap::_getTimeDiff(struct timespec startTime, struct timespec endTime) {
     return (ulong)((endTime.tv_sec - startTime.tv_sec)*1000000 +
         double(endTime.tv_nsec - startTime.tv_nsec)/1000);
 }
 
-inline int ChainedHashmap::_getHashpower() {
+inline int Hashmap::_getHashpower() {
     int hashpower = 0;
     while (pow(2, hashpower) < this->cardinality/1.5) {
         hashpower += 1;
