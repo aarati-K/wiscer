@@ -1,3 +1,5 @@
+#ifdef STORE
+
 #include "store_workload.h"
 
 StoreWorkload::StoreWorkload() {
@@ -86,3 +88,5 @@ void StoreWorkload::_heapSort(ulong arr[], long n) {
         _heapify(arr, i, 0);
     }
 }
+
+#endif // STORE

@@ -1,15 +1,6 @@
-#include <cstdio>
-#include <cstdlib>
-#include <stdlib.h>
-#include <time.h>
-#include <iostream>
-#include <cmath>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include "metrics.h"
-
-using namespace std;
+/*
+ * Interface for storage engine implementation
+ */
 
 #ifndef _HASHMAP_H_
 #define _HASHMAP_H_

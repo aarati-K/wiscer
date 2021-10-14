@@ -8,20 +8,20 @@
 #include <vector>
 #include <fstream>
 #include <cmath>
-#include "hashmap.h"
-#include "chained.h"
-#include "chained_adaptive.h"
+#include "storage_engine.cpp"
 #include "metrics.h"
-#include "store_workload.h"
 
 using namespace std;
+
+#ifndef _WORKLOAD_H_
+#define _WORKLOAD_H_
 
 // Initial key popularity orders
 #define RANDOM  0
 #define SORTED  1
 
 // Key patterns
-// #define RANDOM 0
+// #define RANDOM 0 (default)
 #define SEQUENTIAL 1
 
 class Workload {
@@ -88,3 +88,5 @@ public:
     void run();
     void free();
 };
+
+#endif // _WORKLOAD_H_
