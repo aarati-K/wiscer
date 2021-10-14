@@ -1,8 +1,9 @@
 #!/bin/bash
 
 mkdir -p output
-make clean && make default && cp benchmark.out default.out
-make clean && make vip && cp benchmark.out vip.out
+make clean
+make default && cp benchmark.out default.out
+make vip && cp benchmark.out vip.out
 
 echo "Workload: STATIC POPULARITY UNIFORM DISTRIBUTION"
 echo "workloads/static_popularity_default_zipf0"
