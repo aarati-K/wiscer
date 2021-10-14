@@ -1,15 +1,37 @@
-#include "hashmap.h"
+#ifdef STORE
+
+#include <cstdio>
+#include <cstdlib>
+#include <stdlib.h>
+#include <time.h>
+#include <iostream>
+#include <cmath>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include "metrics.h"
 #include <fstream>
 
 using namespace std;
 
-#ifndef _STORE_WORKLOAD_H_
-#define _STORE_WORKLOAD_H_
+#define FETCH_REQ 0
+#define INSERT_REQ 1
+#define DELETE_REQ 2
 
 #define _SORT_KEYS_ 0
 
-class StoreWorkload : public Hashmap {
+typedef struct HashmapReq {
+    ulong key;
+    ulong value;
+    uint8_t reqType;
+} HashmapReq;
+
+class StoreWorkload {
 private:
+    int hashpower;
+    long cardinality;
+    ulong hmsize;
+
     ofstream keys_file;
     ofstream ops_file;
 
@@ -28,4 +50,6 @@ public:
     void _heapSort(ulong*, long);
 };
 
-#endif // _STORE_WORKLOAD_H_
+typedef StoreWorkload Hashmap;
+
+#endif // STORE

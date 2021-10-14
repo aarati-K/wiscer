@@ -1,3 +1,5 @@
+#ifdef VIP
+
 #include "chained_adaptive.h"
 
 ChainedAdaptive::ChainedAdaptive() {
@@ -486,3 +488,5 @@ inline void ChainedAdaptive::_clearCache() {
     return;
 #endif
 }
+
+#endif // VIP

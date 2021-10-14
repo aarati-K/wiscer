@@ -1,3 +1,5 @@
+#ifdef DEFAULT
+
 #include "chained.h"
 
 ChainedHashmap::ChainedHashmap() {
@@ -172,3 +174,5 @@ inline int ChainedHashmap::_getHashpower() {
     }
     return hashpower;
 }
+
+#endif // DEFAULT

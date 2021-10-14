@@ -1,4 +1,5 @@
-#include "workload.h"
+#include "workload.cpp"
+#include "metrics.cpp"
 #include <cstdlib>
 #include <iostream>
 

@@ -1,8 +1,10 @@
+#ifdef STORE
+
 #include "store_workload.h"
 
 StoreWorkload::StoreWorkload() {
-    keys_file.open("keys.txt", ios::out | ios::binary);
-    ops_file.open("ops.txt", ios::out | ios::binary);
+    keys_file.open("keys", ios::out | ios::binary);
+    ops_file.open("ops", ios::out | ios::binary);
 }
 
 void StoreWorkload::initHashpower(int hashpower) {}
@@ -19,7 +21,6 @@ void StoreWorkload::bulkLoad(ulong *keys, ulong num_keys) {
     clock_gettime(CLOCK_MONOTONIC, &(m.endTime));
     cout << "Sort time (us): " << getTimeDiff(m.startTime, m.endTime) << endl;
 #endif
-    keys_file.write((char*)&num_keys, sizeof(ulong));
     for (ulong i=0; i<num_keys; i++) {
         keys_file.write((char*)&keys[i], sizeof(ulong));
     }
@@ -86,3 +87,5 @@ void StoreWorkload::_heapSort(ulong arr[], long n) {
         _heapify(arr, i, 0);
     }
 }
+
+#endif // STORE
