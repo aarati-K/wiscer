@@ -19,7 +19,9 @@ for line in f:
         if len(row):
             # Calculate gain
             gain = (row[2] - row[1])*100/row[1]
-            row.append("{0:.1f}%".format(gain))
+            row.append("{0:+.1f}%".format(gain))
+            row[1] = "{0:.1f}".format(row[1])
+            row[2] = "{0:.1f}".format(row[2])
             table.append(row)
             row = []
         workload_name = splits[1]
@@ -33,7 +35,9 @@ for line in f:
 
 if len(row):
     gain = (row[2] - row[1])*100/row[1]
-    row.append("{0:.1f}%".format(gain))
+    row.append("{0:+.1f}%".format(gain))
+    row[1] = "{0:.1f}".format(row[1])
+    row[2] = "{0:.1f}".format(row[2])
     table.append(row)
 
 print(tabulate(table, headers=head, tablefmt="grid"))

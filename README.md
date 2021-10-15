@@ -12,13 +12,12 @@ Wiscer is a benchmarking tool for systematically generating point query (fetch/i
 
 ## Building & Running Wiscer <a name="buildnrun"></a>
 
-To build Wiscer, run
+To build and run Wiscer, run
 
 ```
-$ make
-$ ./bechmark.out
-Usage: ./benchmark.out workload_file_name (random_seed)
-$ ./benchmark.out workloads/test
+$ ./run.sh
+Usage: ./run.sh workload_file {random_seed}
+$ ./run.sh workloads/test
 ```
 
 Operation throughput (and other hardware metrics if configured, see below) is measured for every batch of 1M requests, and the output is stored to file `output.txt` unless an `outputFile` parameter is specified in the workload. The directory `workloads/` contains multiple workload files for reference.
@@ -72,7 +71,7 @@ We have provided multiple workload files that capture different workload behavio
 * *Steady State* - Insert and delete operations are equal, and the number of keys remains approximately steady
 * *Read Mostly* - Small percentage of insert operations are issued, causing the number of keys to grow over time.
 
-Overall, a total of six workloads for each hash table implementation have been provided. To run all the workloads,
+Overall, a total of seven workloads for each hash table implementation have been provided. To run all the workloads,
 
 ```
 $ ./run_all.sh > results.txt
@@ -93,6 +92,23 @@ $ pip install tabulate
 Then, run
 ```
 $ python2 parse_results.py
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| Workload                               |   Chained Hashing (Mops/s) |   VIP Hashing (Mops/s) | Gain VIP vs Chained hashing   |
++========================================+============================+========================+===============================+
+| STATIC POPULARITY UNIFORM DISTRIBUTION |                       20.7 |                   20.3 | -1.9%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| STATIC POPULARITY LOW SKEW             |                       30.5 |                   37.1 | +21.8%                        |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| STATIC POPULARITY MEDIUM SKEW          |                      112.6 |                  241.5 | +114.6%                       |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| MEDIUM POPULARITY CHURN                |                       30.2 |                   35.9 | +18.9%                        |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| HIGH POPULARITY CHURN                  |                       30.4 |                   34   | +11.8%                        |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| STEADY STATE                           |                       27.2 |                   28.6 | +5.4%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
+| READ MOSTLY                            |                       21.7 |                   21.9 | +0.7%                         |
++----------------------------------------+----------------------------+------------------------+-------------------------------+
 ```
 
 ## Measuring Hardware Metrics using the Intel PMU <a name="pmu"></a>
