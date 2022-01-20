@@ -179,26 +179,24 @@ inline void Workload::initHashmap() {
     if (this->keyPattern == RANDOM) {
         popOrder[0] = this->_multAddHash(0);
         cumProb[0] = 1/pow(1, this->zipf);
-        cumsum = cumProb[0];
-        for (ulong i=1; i<initialSize; i++) {
+        for (ulong i=1; i<finalSize; i++) {
             /* Mult Add hash function, for generating random ulong numbers */
             popOrder[i] = this->_multAddHash(i);
             cumProb[i] = 1/pow(i+1, this->zipf);
-            cumsum += cumProb[i];
             cumProb[i] += cumProb[i-1];
         }
+        cumsum = cumProb[initialSize-1];
     } else { // SEQUENTIAL
         popOrder[0] = 0;
         cumProb[0] = 1/pow(1, this->zipf);
-        cumsum = cumProb[0];
-        for (ulong i=1; i<initialSize; i++) {
+        for (ulong i=1; i<finalSize; i++) {
             popOrder[i] = i;
             cumProb[i] = 1/pow(i+1, this->zipf);
-            cumsum += cumProb[i];
             cumProb[i] += cumProb[i-1];
         }
         // The popularity order of keys is arbitrary
         this->_random_shuffle(popOrder, initialSize);
+        cumsum = cumProb[initialSize-1];
     }
 
     hm->bulkLoad(popOrder, initialSize);
@@ -291,11 +289,7 @@ inline void Workload::_genInsertReq(HashmapReq *reqs, ulong i) {
 
     // set state tracking params
     this->cardinality += 1;
-    if (this->cumProb[this->cardinality-1] == 0) {
-        this->cumProb[this->cardinality-1] = 1/pow(this->cardinality, zipf);
-        this->cumProb[this->cardinality-1] += this->cumProb[this->cardinality-2];
-    }
-    this->cumsum += this->cumProb[this->cardinality-1] - this->cumProb[this->cardinality-2];
+    this->cumsum = cumProb[this->cardinality-1];
 }
 
 inline void Workload::_genDeleteReq(HashmapReq *reqs, ulong i) {
@@ -320,8 +314,8 @@ inline void Workload::_genDeleteReq(HashmapReq *reqs, ulong i) {
     popOrder[p] = popOrder[this->cardinality-1];
 
     // set state tracking params
-    cumsum -= (cumProb[this->cardinality-1] - cumProb[this->cardinality-2]);
     this->cardinality -= 1;
+    this->cumsum = cumProb[this->cardinality-1];
 }
 
 inline void Workload::_shiftDist() {
