@@ -169,7 +169,8 @@ inline void Workload::initHashmap() {
     hm->initHashpower(hashpower);
     this->_choosePrime();
 
-    ulong finalSize = this->initialSize + this->insertProportion*operationCount + 1;
+    // Add slack to finalSize since requests are generated randomly
+    ulong finalSize = this->initialSize + (this->insertProportion + 0.1)*operationCount + 1;
     popOrder = (ulong*)malloc(sizeof(ulong)*finalSize);
     cumProb = (double*)malloc(sizeof(double)*finalSize);
     memset(cumProb, 0, sizeof(double)*finalSize);
