@@ -20,11 +20,11 @@ sleep 10
 
 echo "Workload: STATIC POPULARITY MEDIUM SKEW"
 echo "workloads/static_popularity_default_zipf1_5"
-taskset -c ${core} ./default.out workloads/static_popularity_default_zipf2
+taskset -c ${core} ./default.out workloads/static_popularity_default_zipf1_5
 echo "-------------"
 sleep 10
 echo "workloads/static_popularity_adaptive_zipf1_5"
-taskset -c ${core} ./vip.out workloads/static_popularity_adaptive_zipf2
+taskset -c ${core} ./vip.out workloads/static_popularity_adaptive_zipf1_5
 echo "-------------"
 sleep 10
 echo ""
